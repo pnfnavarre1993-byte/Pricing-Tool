@@ -1,0 +1,2180 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Material Pricing Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              base: '#0f172a',
+              card: '#1e293b',
+              cardLight: '#253347',
+              accent: '#f97316',
+              accentHover: '#ea580c',
+              accentLight: '#fdba74',
+              border: '#334155',
+              textPrimary: '#f1f5f9',
+              textSecondary: '#e2e8f0',
+              textMuted: '#94a3b8',
+              textDim: '#64748b',
+              danger: '#ef4444',
+              dangerHover: '#dc2626',
+              rowEven: '#1a2536',
+              rowOdd: '#1e293b',
+            },
+            fontFamily: {
+              sans: ['Inter', 'system-ui', 'sans-serif'],
+            },
+          },
+        },
+      };
+    </script>
+    <script src="https://unpkg.com/lucide@latest" defer></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body {
+        font-family: 'Inter', system-ui, sans-serif;
+        background: #0f172a;
+        color: #f1f5f9;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      input[type="number"]::-webkit-inner-spin-button,
+      input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+      input[type="number"] { -moz-appearance: textfield; }
+      select {
+        -webkit-appearance: none; -moz-appearance: none; appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+        background-repeat: no-repeat; background-position: right 12px center; background-size: 16px;
+      }
+      .pill-btn { transition: all 0.15s ease; white-space: nowrap; }
+      .pill-btn.active { background: #f97316; color: #fff; box-shadow: 0 0 12px rgba(249,115,22,0.35); }
+      .pill-btn:not(.active):hover { background: #334155; }
+      .unit-btn.active { background: #f97316; color: #fff; }
+      .unit-btn:not(.active):hover { background: #334155; }
+      .banner-type-btn { transition: all 0.15s ease; white-space: nowrap; }
+      .banner-type-btn.active { background: #f97316; color: #fff; box-shadow: 0 0 12px rgba(249,115,22,0.35); border-color: #f97316; }
+      .banner-type-btn:not(.active):hover { background: #334155; }
+      .sticker-pill-btn { transition: all 0.15s ease; white-space: nowrap; }
+      .sticker-pill-btn.active { background: #f97316; color: #fff; box-shadow: 0 0 12px rgba(249,115,22,0.35); border-color: #f97316; }
+      .sticker-pill-btn:not(.active):hover { background: #334155; }
+      .sticker-pill-btn.unavailable { opacity: 0.35; cursor: not-allowed !important; pointer-events: none; }
+      .corr-size-btn { transition: all 0.15s ease; white-space: nowrap; }
+      .corr-size-btn.active { background: #f97316; color: #fff; box-shadow: 0 0 12px rgba(249,115,22,0.35); border-color: #f97316; }
+      .corr-size-btn:not(.active):hover { background: #334155; }
+      .fade-in { animation: fadeIn 0.35s ease-out; }
+      @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+      @keyframes slideIn { from { opacity: 0; transform: translateX(-12px); } to { opacity: 1; transform: translateX(0); } }
+      .slide-in { animation: slideIn 0.3s ease-out; }
+      .stat-box { background: #0f172a; border: 1px solid #334155; }
+      .scrollbar-thin::-webkit-scrollbar { width: 4px; }
+      .scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+      .scrollbar-thin::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+      @media (min-width: 1024px) { .app-layout { height: calc(100vh - 48px); overflow: hidden; } }
+      .job-item-card { transition: all 0.2s ease; }
+      .job-item-card:hover { background: #253347; }
+      .delete-btn { transition: all 0.15s ease; }
+      .delete-btn:hover { background: rgba(239,68,68,0.15); }
+      .labor-order-card { background: #0f172a; border: 1px solid #334155; border-left: 3px solid #f97316; }
+      .canvas-ref-match { background: #14532d; color: #86efac; border: 1px solid #166534; }
+      .banner-tier-badge { background: rgba(249,115,22,0.15); border: 1px solid rgba(249,115,22,0.4); color: #fdba74; }
+      .banner-tier-warning { background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.35); color: #fca5a5; }
+      .margin-badge-green { background: rgba(74,222,128,0.12); border: 1px solid rgba(74,222,128,0.3); color: #4ade80; }
+      .margin-badge-amber { background: rgba(251,191,36,0.12); border: 1px solid rgba(251,191,36,0.3); color: #fbbf24; }
+      .margin-badge-red { background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); color: #f87171; }
+      .lam-toggle-track { width: 36px; height: 20px; border-radius: 10px; background: #334155; position: relative; cursor: pointer; transition: background 0.2s ease; flex-shrink: 0; }
+      .lam-toggle-track.active { background: #f97316; }
+      .lam-toggle-thumb { width: 16px; height: 16px; border-radius: 50%; background: #fff; position: absolute; top: 2px; left: 2px; transition: transform 0.2s ease; }
+      .lam-toggle-track.active .lam-toggle-thumb { transform: translateX(16px); }
+      .lam-badge { background: rgba(249,115,22,0.18); border: 1px solid rgba(249,115,22,0.45); color: #fdba74; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 9999px; white-space: nowrap; }
+      #pill-tooltip { position: fixed; z-index: 99999; max-width: 220px; background: #1e293b; border: 1px solid #f97316; color: #f1f5f9; font-size: 12px; line-height: 1.45; padding: 8px 12px; border-radius: 6px; box-shadow: 0 4px 16px rgba(0,0,0,0.45); pointer-events: none; display: none; opacity: 0; transition: opacity 150ms ease; }
+      #pill-tooltip.visible { opacity: 1; }
+      #pill-tooltip-arrow { position: absolute; bottom: -6px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 6px solid #f97316; }
+      .sticker-price-box { background: #0f172a; border: 2px solid #f97316; border-radius: 12px; padding: 16px; text-align: center; }
+      .sticker-price-box .price-value { font-size: 2rem; font-weight: 800; color: #f97316; line-height: 1.2; }
+      .corr-price-preview { background: #0f172a; border: 2px solid #f97316; border-radius: 12px; padding: 16px; }
+      .corr-price-preview .per-sheet-price { font-size: 1.5rem; font-weight: 800; color: #f97316; line-height: 1.2; }
+      .validation-clamp-msg { color: #f97316; font-size: 11px; font-weight: 500; margin-top: 4px; display: none; }
+      .validation-clamp-msg.visible { display: block; }
+      .print-service-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border: 1px solid #334155; border-left: 3px solid transparent; border-radius: 8px; cursor: pointer; transition: all 0.15s ease; background: #0f172a; }
+      .print-service-row:hover { background: #1a2536; }
+      .print-service-row.active { border-left-color: #f97316; background: #253347; }
+      .print-service-row .service-name { font-size: 13px; font-weight: 500; color: #f1f5f9; }
+      .print-service-row .service-price { font-size: 13px; font-weight: 700; color: #f97316; white-space: nowrap; }
+      .print-preview-card { background: #0f172a; border: 2px solid #f97316; border-radius: 12px; padding: 16px; }
+      .print-preview-card .print-total-value { font-size: 1.5rem; font-weight: 800; color: #f97316; line-height: 1.2; }
+      .summary-remove-btn { width: 20px; height: 20px; min-width: 20px; min-height: 20px; border-radius: 50%; background: #334155; color: #e2e8f0; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; line-height: 1; padding: 0; transition: background 0.15s ease, color 0.15s ease; flex-shrink: 0; }
+      .summary-remove-btn:hover { background: #ef4444; color: #fff; }
+      .print-quote-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px 20px; border: 2px solid #f97316; border-radius: 10px; background: transparent; color: #f97316; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s ease; }
+      .print-quote-btn:hover:not(:disabled) { background: rgba(249,115,22,0.12); }
+      .print-quote-btn:disabled { border-color: #334155; color: #64748b; cursor: not-allowed; opacity: 0.6; }
+      .customer-info-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px 20px; border: 2px solid #f97316; border-radius: 10px; background: transparent; color: #f97316; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s ease; position: relative; }
+      .customer-info-btn:hover { background: rgba(249,115,22,0.12); }
+      .customer-info-badge { width: 10px; height: 10px; border-radius: 50%; background: #f97316; position: absolute; top: 8px; right: 12px; box-shadow: 0 0 6px rgba(249,115,22,0.6); display: none; }
+      .customer-info-badge.visible { display: block; }
+      .ci-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90000; display: none; align-items: center; justify-content: center; }
+      .ci-modal-backdrop.open { display: flex; }
+      .ci-modal-card { background: #fff; color: #111; border-radius: 14px; max-width: 400px; width: 92%; padding: 28px; position: relative; box-shadow: 0 12px 40px rgba(0,0,0,0.35); animation: fadeIn 0.2s ease-out; }
+      .ci-modal-card h3 { font-size: 18px; font-weight: 700; color: #111; margin-bottom: 20px; }
+      .ci-modal-close { position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; border-radius: 50%; border: none; background: #f3f4f6; color: #6b7280; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+      .ci-modal-close:hover { background: #e5e7eb; color: #111; }
+      .ci-modal-label { display: block; font-size: 12px; font-weight: 600; color: #374151; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.3px; }
+      .ci-modal-input { width: 100%; border: 1.5px solid #d1d5db; border-radius: 8px; padding: 10px 14px; font-size: 14px; color: #111; background: #fff; margin-bottom: 14px; outline: none; transition: border-color 0.15s ease; font-family: 'Inter', system-ui, sans-serif; }
+      .ci-modal-input:focus { border-color: #f97316; box-shadow: 0 0 0 3px rgba(249,115,22,0.12); }
+      .ci-modal-input::placeholder { color: #9ca3af; }
+      .ci-modal-actions { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; }
+      .ci-modal-save { background: #f97316; color: #fff; border: none; border-radius: 8px; padding: 10px 28px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Inter', system-ui, sans-serif; }
+      .ci-modal-save:hover { background: #ea580c; }
+      .ci-modal-clear { background: none; border: none; color: #6b7280; font-size: 13px; font-weight: 600; cursor: pointer; padding: 6px 12px; font-family: 'Inter', system-ui, sans-serif; }
+      .ci-modal-clear:hover { color: #ef4444; }
+      .poster-size-btn { transition: all 0.15s ease; white-space: nowrap; }
+      .poster-size-btn.active { background: #f97316; color: #fff; box-shadow: 0 0 12px rgba(249,115,22,0.35); border-color: #f97316; }
+      .poster-size-btn:not(.active):hover { background: #334155; }
+      .poster-price-preview { background: #0f172a; border: 2px solid #f97316; border-radius: 12px; padding: 16px; }
+      .poster-price-preview .poster-total-value { font-size: 1.5rem; font-weight: 800; color: #f97316; line-height: 1.2; }
+      .discount-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px 20px; border: 2px solid #22c55e; border-radius: 10px; background: transparent; color: #22c55e; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s ease; position: relative; }
+      .discount-btn:hover { background: rgba(34,197,94,0.12); }
+      .discount-active-badge { width: 10px; height: 10px; border-radius: 50%; background: #22c55e; position: absolute; top: 8px; right: 12px; box-shadow: 0 0 6px rgba(34,197,94,0.6); display: none; }
+      .discount-active-badge.visible { display: block; }
+      .tax-exempt-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px 20px; border: 2px solid #3b82f6; border-radius: 10px; background: transparent; color: #3b82f6; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s ease; position: relative; }
+      .tax-exempt-btn:hover { background: rgba(59,130,246,0.12); }
+      .tax-exempt-btn.active { background: rgba(59,130,246,0.2); border-color: #2563eb; color: #2563eb; }
+      .tax-exempt-active-badge { width: 10px; height: 10px; border-radius: 50%; background: #3b82f6; position: absolute; top: 8px; right: 12px; box-shadow: 0 0 6px rgba(59,130,246,0.6); display: none; }
+      .tax-exempt-active-badge.visible { display: block; }
+      .misc-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px 20px; border: 2px solid #ef4444; border-radius: 10px; background: transparent; color: #ef4444; font-size: 14px; font-weight: 700; cursor: pointer; transition: all 0.15s ease; position: relative; }
+      .misc-btn:hover { background: rgba(239,68,68,0.12); }
+      .misc-btn.active { background: rgba(239,68,68,0.2); border-color: #dc2626; color: #dc2626; }
+      .misc-active-badge { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; position: absolute; top: 8px; right: 12px; box-shadow: 0 0 6px rgba(239,68,68,0.6); display: none; }
+      .misc-active-badge.visible { display: block; }
+      .disc-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 90000; display: none; align-items: center; justify-content: center; }
+      .disc-modal-backdrop.open { display: flex; }
+      .pb-modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 90001; display: none; align-items: center; justify-content: center; }
+      .pb-modal-backdrop.open { display: flex; }
+      .pb-modal-card { background: #1e293b; border: 1px solid #334155; border-radius: 16px; padding: 32px 28px 28px; width: 100%; max-width: 380px; box-shadow: 0 25px 60px rgba(0,0,0,0.5); position: relative; }
+      .pb-modal-title { font-size: 18px; font-weight: 800; color: #f1f5f9; margin-bottom: 6px; }
+      .pb-modal-subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 22px; }
+      .pb-modal-label { font-size: 11px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 6px; display: block; }
+      .pb-modal-input { width: 100%; background: #0f172a; border: 1.5px solid #334155; border-radius: 8px; padding: 11px 14px; color: #f1f5f9; font-size: 15px; font-weight: 600; outline: none; transition: border-color 0.15s; }
+      .pb-modal-input:focus { border-color: #f97316; }
+      .pb-modal-input.error { border-color: #ef4444; }
+      .pb-modal-error { font-size: 12px; color: #ef4444; margin-top: 6px; min-height: 18px; }
+      .pb-modal-actions { display: flex; gap: 10px; margin-top: 24px; }
+      .pb-modal-cancel { flex: 1; padding: 11px; border: 1.5px solid #334155; border-radius: 8px; background: transparent; color: #94a3b8; font-size: 14px; font-weight: 600; cursor: pointer; }
+      .pb-modal-cancel:hover { border-color: #64748b; color: #cbd5e1; }
+      .pb-modal-confirm { flex: 2; padding: 11px; border: none; border-radius: 8px; background: #f97316; color: white; font-size: 14px; font-weight: 700; cursor: pointer; transition: background 0.15s; }
+      .pb-modal-confirm:hover { background: #ea6b10; }
+      .pb-modal-confirm:disabled { background: #475569; cursor: not-allowed; }
+      .disc-modal-card { background: #fff; color: #111; border-radius: 14px; max-width: 370px; width: 92%; padding: 28px; position: relative; box-shadow: 0 12px 40px rgba(0,0,0,0.35); animation: fadeIn 0.2s ease-out; }
+      .disc-modal-card h3 { font-size: 18px; font-weight: 700; color: #111; margin-bottom: 6px; }
+      .disc-modal-card .disc-subtitle { font-size: 13px; color: #6b7280; margin-bottom: 18px; }
+      .disc-modal-close { position: absolute; top: 14px; right: 14px; width: 28px; height: 28px; border-radius: 50%; border: none; background: #f3f4f6; color: #6b7280; font-size: 16px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+      .disc-modal-close:hover { background: #e5e7eb; color: #111; }
+      .disc-input-wrap { position: relative; margin-bottom: 18px; }
+      .disc-input-wrap input { width: 100%; border: 1.5px solid #d1d5db; border-radius: 8px; padding: 12px 40px 12px 14px; font-size: 18px; font-weight: 700; color: #111; background: #fff; outline: none; font-family: 'Inter', system-ui, sans-serif; }
+      .disc-input-wrap input:focus { border-color: #22c55e; box-shadow: 0 0 0 3px rgba(34,197,94,0.15); }
+      .disc-input-wrap .disc-pct-sign { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 18px; font-weight: 700; color: #9ca3af; }
+      .disc-modal-actions { display: flex; align-items: center; justify-content: space-between; }
+      .disc-modal-apply { background: #22c55e; color: #fff; border: none; border-radius: 8px; padding: 10px 28px; font-size: 14px; font-weight: 700; cursor: pointer; font-family: 'Inter', system-ui, sans-serif; }
+      .disc-modal-apply:hover { background: #16a34a; }
+      .disc-modal-remove { background: none; border: none; color: #6b7280; font-size: 13px; font-weight: 600; cursor: pointer; padding: 6px 12px; font-family: 'Inter', system-ui, sans-serif; }
+      .disc-modal-remove:hover { color: #ef4444; }
+      .disc-preview-line { font-size: 13px; color: #374151; margin-bottom: 14px; min-height: 20px; }
+      .disc-preview-line .disc-preview-amount { font-weight: 700; color: #22c55e; }
+      .scanfax-type-btn { transition: all 0.15s ease; white-space: nowrap; }
+      .scanfax-type-btn.active { background: #f97316; color: #fff; box-shadow: 0 0 12px rgba(249,115,22,0.35); border-color: #f97316; }
+      .scanfax-type-btn:not(.active):hover { background: #334155; }
+      .scanfax-price-preview { background: #0f172a; border: 2px solid #f97316; border-radius: 12px; padding: 16px; }
+      #quote-overlay { display: none; }
+      #quote-overlay .quote-page-border { border: none; padding: 32px 36px; }
+      #quote-overlay .quote-logo-wrap { text-align: center; margin-bottom: 10px; }
+      #quote-overlay .quote-logo-wrap img { max-height: 90px; margin: 0 auto; display: block; }
+      #quote-overlay .quote-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
+      #quote-overlay .quote-company-name { font-size: 22px; font-weight: 800; color: #111; line-height: 1.2; }
+      #quote-overlay .quote-tagline { font-size: 12px; color: #6b7280; margin-top: 2px; }
+      #quote-overlay .quote-title { font-size: 28px; font-weight: 800; color: #f97316; letter-spacing: 2px; text-align: right; }
+      #quote-overlay .quote-date { font-size: 12px; color: #6b7280; text-align: right; margin-top: 2px; }
+      #quote-overlay .quote-hr { border: none; border-top: 2px solid #f97316; margin: 14px 0 18px 0; }
+      #quote-overlay .quote-customer-block { margin-bottom: 18px; }
+      #quote-overlay .quote-cust-label { font-size: 11px; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.5px; font-weight: 600; margin-bottom: 4px; }
+      #quote-overlay .quote-cust-name { font-size: 16px; font-weight: 700; color: #111; margin-bottom: 2px; }
+      #quote-overlay .quote-cust-detail { font-size: 13px; color: #6b7280; margin-bottom: 2px; }
+      #quote-overlay .quote-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 20px; font-family: 'Inter', Arial, sans-serif; }
+      #quote-overlay .quote-table thead th { background: #f3f4f6; color: #374151; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; padding: 8px 12px; border-bottom: 2px solid #d1d5db; text-align: left; }
+      #quote-overlay .quote-table thead th.text-right { text-align: right; }
+      #quote-overlay .quote-table tbody td { padding: 8px 12px; border-bottom: 1px solid #e5e7eb; vertical-align: top; color: #111; }
+      #quote-overlay .quote-table tbody tr.quote-row-even { background: #f9fafb; }
+      #quote-overlay .quote-table tbody td.text-right { text-align: right; }
+      #quote-overlay .quote-totals-block { display: flex; justify-content: flex-end; margin-bottom: 24px; }
+      #quote-overlay .quote-totals-inner { width: 260px; }
+      #quote-overlay .quote-totals-row { display: flex; justify-content: space-between; align-items: baseline; padding: 4px 0; font-size: 13px; color: #111; }
+      #quote-overlay .quote-totals-row.quote-total-final { font-size: 18px; font-weight: 800; padding: 10px 0 4px 0; }
+      #quote-overlay .quote-totals-row.quote-discount-row { color: #16a34a; font-weight: 600; }
+      #quote-overlay .quote-totals-divider { border: none; border-top: 1px solid #d1d5db; margin: 6px 0; }
+      #quote-overlay .quote-totals-note { font-size: 10px; color: #9ca3af; text-align: right; margin-top: 4px; }
+      #quote-overlay .quote-footer { margin-top: 24px; text-align: center; padding-top: 20px; border-top: 1px solid #e5e7eb; }
+      #quote-overlay .quote-footer-thanks { font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 4px; }
+      #quote-overlay .quote-footer-contact { font-size: 11px; color: #9ca3af; }
+
+      @media print {
+        * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+        html {
+          height: auto !important;
+          overflow: visible !important;
+          margin: 0 !important;
+          padding: 0 !important;
+        }
+        body {
+          height: auto !important;
+          overflow: visible !important;
+          margin: 0 !important;
+          padding: 0 !important;
+          background: white !important;
+        }
+        body > *:not(#quote-overlay) { display: none !important; }
+        #quote-overlay {
+          display: block !important;
+          position: static !important;
+          width: 100% !important;
+          height: auto !important;
+          overflow: visible !important;
+          background: white !important;
+          padding: 28px 36px !important;
+          box-sizing: border-box !important;
+          margin: 0 !important;
+        }
+        .quote-page-border { border: none !important; padding: 28px 32px; }
+        .quote-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-bottom: 16px; }
+        .quote-table thead { display: table-header-group; }
+        .quote-table tbody tr { page-break-inside: avoid; break-inside: avoid; }
+        .quote-table tbody td.text-right { text-align: right; }
+        .quote-totals-block { page-break-inside: avoid; break-inside: avoid; margin-bottom: 16px; }
+        .quote-footer { margin-top: 16px; text-align: center; padding-top: 16px; border-top: 1px solid #e5e7eb; page-break-inside: avoid; break-inside: avoid; }
+      }
+    </style>
+  </head>
+  <body data-id="0" class="bg-base">
+    <app-icon data-id="1" hidden data-icon="ruler" data-palette="Dark"></app-icon>
+
+    <!-- Hidden logo image to preload for print quote -->
+    <img data-id="2" id="pnf-logo-img" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQEASABIAAD/wAARCAQABAADASIAAhEBAxEB/8QBogAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoLEAACAQMDAgQDBQUEBAAAAX0BAgMABBEFEiExQQYTUWEHInEUMoGRoQgjQrHBFVLR8CQzYnKCCQoWFxgZGiUmJygpKjQ1Njc4OTpDREVGR0hJSlNUVVZXWFlaY2RlZmdoaWpzdHV2d3h5eoOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4eLj5OXm5+jp6vHy8/T19vf4+foBAAMBAQEBAQEBAQEAAAAAAAABAgMEBQYHCAkKCxEAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9sAhAALCAgKCAcLCgkKDQwLDREcEhEPDxEiGRoUHCkkKyooJCcnLTJANy0wPTAnJzhMOT1DRUhJSCs2T1VORlRAR0hFAQwNDREPESESEiFFLicuRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUVFRUX/2gAMAwEAAhEDEQA/APXKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiijNABRUE19a2/+vuYYv9+QL/M1Sk8T6HCSJNYsFI7G5T/GnZgalFc+/jvwzGSG1q1yPRs/yqFviJ4WXOdYi49Ec/0p8suwro6aiuW/4WT4U/6Cy/8AfmT/AOJo/wCFk+FP+gsv/fmT/wCJo5JdgujqaK5cfEjwqf8AmLJ/36k/+Jpw+InhY/8AMYi/FH/wo5JdgujpqK59PHfhl+mtWo+rY/nVqPxXoEv3NasD/wBvCD+tLlfYLo1qKqRarYXH+pvbaTP9yVT/CNWwQehzSGFFGaKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiigkDrQAUVilian800DSMrd6pB5g/wCWcZ8xvyXOK5HUfjJZR5XTdNnnPZ52EY/IZP8AKrUJPZCckj0ukJA5PSvC9Q+KfiO9yIJYLJD2giyfzbNczfazqWpk/b7+6uR6Sykj8ulaKhLqQ6iPoO+8WaFpuRd6raRsOqCQM35DJrnr34s+HrbIt/tV2fWKHaPzYivDxx0GPpRWioR6kuoz1G7+M0pBFlo6r6NPPn9AP61h3fxV8SXGfKktbUf9Mocn/wAeJriqKtUoLoS5yN248aeI7onzdZuxntG+wf8AjoFZk+pX11/x83tzNn/npMzfzNVaKtRS2RN2GAeoB+tAAHQCiimAUtJRQIKWkooAKM0UUALk0nXqKKKAE2j+6PyqaG5nt2zBPLER3jcr/I1FRQM2LfxZr9qR5Os3wA7NMWH5Nmte2+J3ie3I33sU4HaeBf5jBrkKKlwi+g+ZnpVn8ZL9OL7S7eYesMjRn8jmt+z+L+iTYF3bXlsT1OwOo/I5/SvFqKh0YMamz6MsPGvh7UsC21a23HokjeW35NitmJxKgdDuVhkEdjXy4CQcg4NbOl+J9Y0Uj+z9RuIFH/LPeWQ/VTwazlQ7MtVO59P0V4Tp/xR8R2WBNNDeoO08Yz+a4rq9O+MllJhdS02eA/34GEg/I4P86zdGSKU0z0uisHTPG3h/VyFtdThEh/5Zyny2/JsZ/Ct4EEZHSs2ntywooopAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFch8Q/FX/AAjuiGK2kxqF4CkODzGP4n/Dt7kV1F9ewadZT3d1II4IELux7AV85eI9duPEetT6hcZG87Y48/6tB0X/AB9ya1pQ5nqROVkZVFFFdpzhXunw58H/APCP6b9tvExqN2oLAjmJOoT69z78dq434YeEf7UvhrN7Hm0tX/cqw4lkHf6L/P6GvZ65a0/so2hHqFMmmjt4JJpnWOKNSzuxwFA5JNPryT4peMDPK2gWEn7qMj7W6n7zdQn0HU+/HY1jCLk7Gjdlc5nxx4uk8U6rmIsun25It4zxu9XPuf0H41y9FFd8YqKsjmbu7hRRRQB2/w58C/2zOuq6lHnT4W/dIw4ncf+yj9Tx616D4u8aWPhG0W3hRZb5k/c2y8BB0BbHRfbv29RhOo+Ef+Ed0Q2t4mNQuwJJlI5iX+FD9Op9z7CuK8a+KI/C2iPO22S7l+S3ib+8e7eyj+grkhac+dHTK0Y8pmePPHN74rvPJUmDTYWzDb5+97uf7x/T/AKKW+KfCn9g3IntyTYzN8p6mNux9/Q/h6181XpHh/wCIunanaJp/iNl3bNn2mUbWT/fffocfWutxdN2aOe6noylqnw6njhMmlXguGHPk3ACk/Rvun881zd34P12xy0+k3ij+9GnmL+a5Fezpqlg8PnJfWrRYzvEyED65q1DPFcRLLBKksbdHRgQfxFYLETXU1dKLPmO5s7mzbbdW00BPTzYyu4fQ8GoK+n5I0lQpIiupGCrDINc5qHw68NanuL6eiSH+K2Ywkfh0/St44juZOh2PnuivW5vhDpjjFtqd5D7yCOQ/oB+lcxqXwi1e1yttc2t5H2K/u5D+B4/WtY1oS6kOm0clRWpe+HNY0tGkvtLu4EHV5ISq/nis0AnoM1ommQNooopkhRRRQAUUUUAFFFFABS0lFAC0lFLQAlFFFAgooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigArK8S6LH4g0G7058BpUzGx/gccqfz/TNatFCdtQPlmaGS3mkhmQpLGxR1PVWBwR+dMr0T4seGzY6ous26fuLw7JsD7soHB/4EB+YPrXndehCXMrnNJWdh0cjxSJJG5R0YMrKcFSOQa+i/CPiBPEnh+3veBN/q51H8Mg6/n1Hsa+c67P4aeJf7C14Wlw+2zvyI2JPCSfwt/Q/UelRVhzRuVCVnY91rlvH/AIa/4SPw+4hTN7a5lgx1Y91/EfqBXU0Vxp2d0bNXPlaiu7+J3hb+x9X/ALTtUxZ3zEsAOI5epH0PJH41wld8ZKSujlas7BRRRVEhRRRQB2/w58C/2zOuq6lHnT4W/dIw4ncf+yj9Tx616D4u8aWPhG0W3hRZb5k/c2y8BB0BbHRfbv29RhOo+Ef+Ed0Q2t4mNQuwJJlI5iX+FD9Op9z7CuK8a+KI/C2iPO22S7l+S3ib+8e7eyj+grkhac+dHTK0Y8pmePPHN74rvPJUmDTYWzDb5+97uf7x/T/AK88kkeWR5JXaR3OWZjksT3JPrT69I+Gvgj7TJFrusR5gTm3hYfff8Avt7Dt6n2rqnJU43ZzxTnKyOf8NfD/WNeEdzKn9n2T8iWdfmcf7K9fxOBXq+geAtE0DZJFbi5ux/y8XADn/gPRfwrpqK4Z1pS0R1xpxjuFFFFYFhRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAH//2Q==" alt="Pack-N-Fax Logo" style="display:none;" />
+
+    <div data-id="3" id="pill-tooltip"><span data-id="4" id="pill-tooltip-text"></span><div data-id="5" id="pill-tooltip-arrow"></div></div>
+    <div data-id="6" id="quote-overlay"></div>
+
+    <!-- Customer Info Modal -->
+    <div data-id="7" id="ci-modal-backdrop" class="ci-modal-backdrop">
+      <div data-id="8" class="ci-modal-card">
+        <button data-id="9" id="ci-modal-close-btn" class="ci-modal-close" title="Close">&#x2715;</button>
+        <h3 data-id="10">Customer Information</h3>
+        <label data-id="11" class="ci-modal-label" for="ci-name-input">Customer Name</label>
+        <input data-id="12" id="ci-name-input" type="text" class="ci-modal-input" placeholder="Full name" />
+        <label data-id="13" class="ci-modal-label" for="ci-phone-input">Phone Number</label>
+        <input data-id="14" id="ci-phone-input" type="tel" class="ci-modal-input" placeholder="(000) 000-0000" />
+        <label data-id="15" class="ci-modal-label" for="ci-email-input">Email Address</label>
+        <input data-id="16" id="ci-email-input" type="email" class="ci-modal-input" placeholder="email@example.com" />
+        <div data-id="17" class="ci-modal-actions">
+          <button data-id="18" id="ci-modal-clear-btn" class="ci-modal-clear">Clear</button>
+          <button data-id="19" id="ci-modal-save-btn" class="ci-modal-save">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Discount Modal -->
+    <div data-id="20" id="disc-modal-backdrop" class="disc-modal-backdrop">
+      <div data-id="21" class="disc-modal-card">
+        <button data-id="22" id="disc-modal-close-btn" class="disc-modal-close" title="Close">&#x2715;</button>
+        <h3 data-id="23">Apply Discount</h3>
+        <p data-id="24" class="disc-subtitle">Choose a discount type and enter the amount.</p>
+        <div data-id="25" style="display:flex;gap:8px;margin-bottom:12px;">
+          <button data-id="26" id="disc-type-pct" style="flex:1;padding:8px;border-radius:8px;font-weight:700;font-size:13px;border:2px solid #22c55e;cursor:pointer;background:#22c55e;color:#fff;">% Off</button>
+          <button data-id="27" id="disc-type-amt" style="flex:1;padding:8px;border-radius:8px;font-weight:700;font-size:13px;border:2px solid #22c55e;cursor:pointer;background:transparent;color:#22c55e;">$ Off</button>
+        </div>
+        <div data-id="28" class="disc-input-wrap">
+          <input data-id="29" id="disc-pct-input" type="number" min="0" step="0.5" placeholder="0" />
+          <span id="disc-type-sign" data-id="30" class="disc-pct-sign">%</span>
+        </div>
+        <p data-id="31" class="disc-preview-line" id="disc-preview-line"></p>
+        <div data-id="32" class="disc-modal-actions">
+          <button data-id="33" id="disc-modal-remove-btn" class="disc-modal-remove">Remove Discount</button>
+          <button data-id="34" id="disc-modal-apply-btn" class="disc-modal-apply">Apply</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PREPARED BY MODAL -->
+    <div data-id="35" id="pb-modal-backdrop" class="pb-modal-backdrop">
+      <div data-id="36" class="pb-modal-card">
+        <p data-id="37" class="pb-modal-title">Who is preparing this quote?</p>
+        <p data-id="38" class="pb-modal-subtitle">Your name will appear on the printed quote.</p>
+        <label data-id="39" class="pb-modal-label" for="pb-name-input">Employee Name</label>
+        <input data-id="40" id="pb-name-input" type="text" class="pb-modal-input" placeholder="First &amp; Last Name" autocomplete="off" />
+        <p data-id="41" id="pb-modal-error" class="pb-modal-error"></p>
+        <div data-id="42" class="pb-modal-actions">
+          <button data-id="43" id="pb-modal-cancel" class="pb-modal-cancel">Cancel</button>
+          <button data-id="44" id="pb-modal-confirm" class="pb-modal-confirm">Generate Quote</button>
+        </div>
+      </div>
+    </div>
+
+    <main data-id="45" class="flex-1 flex flex-col lg:flex-row app-layout">
+      <!-- LEFT PANEL -->
+      <section data-id="46" class="w-full lg:w-[42%] xl:w-[38%] bg-card p-5 md:p-7 lg:p-8 flex flex-col gap-5 lg:overflow-y-auto scrollbar-thin border-b lg:border-b-0 lg:border-r border-border">
+        <div data-id="47" class="flex items-center gap-3 mb-1">
+          <div data-id="48" class="w-10 h-10 rounded-xl bg-accent/15 flex items-center justify-center flex-shrink-0">
+            <i data-id="49" data-lucide="ruler" class="w-5 h-5 text-accent"></i>
+          </div>
+          <div data-id="50">
+            <h1 data-id="51" class="text-xl font-bold text-textPrimary leading-tight">Job Builder</h1>
+            <p data-id="52" class="text-xs text-textMuted mt-0.5">Pack-N-Fax Navarre — Multi-material pricing tool</p>
+          </div>
+        </div>
+
+        <!-- Add Material Form -->
+        <div data-id="53" class="bg-base/40 border border-border rounded-xl p-4 md:p-5 flex flex-col gap-4">
+          <h2 data-id="54" class="text-sm font-semibold text-textPrimary flex items-center gap-2">
+            <i data-id="55" data-lucide="plus-circle" class="w-4 h-4 text-accent"></i>
+            Add Material
+          </h2>
+
+          <!-- Category Pills -->
+          <div data-id="56">
+            <label data-id="57" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-2 block">Category</label>
+            <div data-id="58" id="category-pills" class="flex flex-wrap gap-1.5"></div>
+          </div>
+
+          <!-- Material Dropdown -->
+          <div data-id="59" id="step2-mat">
+            <label data-id="60" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-1.5 block" for="material-select">Material</label>
+            <select data-id="61" id="material-select" class="w-full bg-base border border-border rounded-lg px-3.5 py-2.5 text-sm text-textSecondary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent cursor-pointer pr-10">
+              <option data-id="62" value="">— Choose a material —</option>
+            </select>
+            <div data-id="63" id="material-info" class="hidden mt-2 bg-base/60 rounded-lg px-3 py-2 border border-border/60">
+              <p data-id="64" class="text-[11px] text-textMuted tabular-nums" id="material-info-text"></p>
+            </div>
+          </div>
+
+          <!-- Banner Section -->
+          <div data-id="65" id="banner-section" class="hidden flex flex-col gap-4">
+            <div data-id="66">
+              <label data-id="67" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-2 block">Banner Type</label>
+              <div data-id="68" id="banner-type-pills" class="flex flex-wrap gap-2">
+                <button data-id="69" class="banner-type-btn active flex-1 min-w-[100px] py-2.5 px-3 rounded-lg text-xs font-bold border border-border cursor-pointer text-center" data-banner-type='38" Standard'>38" Standard</button>
+                <button data-id="70" class="banner-type-btn flex-1 min-w-[100px] py-2.5 px-3 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-banner-type='54" Standard'>54" Standard</button>
+                <button data-id="71" class="banner-type-btn flex-1 min-w-[100px] py-2.5 px-3 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-banner-type='54" Laminated'>54" Laminated</button>
+              </div>
+            </div>
+            <div data-id="72">
+              <label data-id="73" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-1.5 block" for="banner-length-input">Banner Length (feet)</label>
+              <div data-id="74" class="relative">
+                <input data-id="75" id="banner-length-input" type="number" min="3" max="40" step="0.5" placeholder="e.g. 8" class="w-full bg-base border border-border rounded-lg px-3.5 py-2.5 text-sm text-textPrimary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent tabular-nums pr-10" />
+                <span data-id="76" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-medium text-textDim">ft</span>
+              </div>
+              <p data-id="77" id="banner-length-clamp-msg" class="validation-clamp-msg">&#x26A0; Max length is 40 ft. Value clamped.</p>
+            </div>
+            <div data-id="78" id="banner-lam-toggle-wrap" class="hidden flex flex-col gap-2">
+              <div data-id="79" class="flex items-center gap-3">
+                <div data-id="80" id="banner-lam-toggle" class="lam-toggle-track" role="switch" aria-checked="false" tabindex="0">
+                  <div data-id="81" class="lam-toggle-thumb"></div>
+                </div>
+                <label data-id="82" class="text-xs font-semibold text-textPrimary cursor-pointer" id="banner-lam-toggle-label">Add Lamination</label>
+              </div>
+              <div data-id="83" id="banner-lam-surcharge-info" class="hidden bg-base/60 rounded-lg px-3 py-2 border border-border/60">
+                <p data-id="84" class="text-[11px] text-textMuted tabular-nums" id="banner-lam-surcharge-text"></p>
+              </div>
+            </div>
+            <div data-id="85" id="banner-lam-auto-info" class="hidden bg-base/60 rounded-lg px-3 py-2 border border-border/60">
+              <p data-id="86" class="text-[11px] text-textMuted tabular-nums" id="banner-lam-auto-text"></p>
+            </div>
+            <div data-id="87" id="banner-tier-badge" class="hidden banner-tier-badge rounded-lg px-3 py-2.5">
+              <p data-id="88" class="text-[11px] font-semibold flex items-center gap-1.5" id="banner-tier-badge-text"></p>
+            </div>
+            <div data-id="89" id="banner-length-warning" class="hidden banner-tier-warning rounded-lg px-3 py-2.5">
+              <p data-id="90" class="text-[11px] font-medium flex items-center gap-1.5">
+                <i data-id="91" data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                Minimum banner length is 3 ft
+              </p>
+            </div>
+            <div data-id="92" id="banner-cost-preview" class="hidden bg-base/60 rounded-lg px-3 py-2.5 border border-border/60">
+              <p data-id="93" class="text-[11px] text-textMuted tabular-nums" id="banner-cost-preview-text"></p>
+            </div>
+          </div>
+
+          <!-- Stickers Section -->
+          <div data-id="94" id="sticker-section" class="hidden flex flex-col gap-4">
+            <div data-id="95">
+              <label data-id="96" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-2 block">Sticker Size</label>
+              <div data-id="97" id="sticker-size-pills" class="flex flex-wrap gap-2">
+                <button data-id="98" class="sticker-pill-btn py-2 px-4 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-sticker-size='2"'>2"</button>
+                <button data-id="99" class="sticker-pill-btn py-2 px-4 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-sticker-size='3"'>3"</button>
+                <button data-id="100" class="sticker-pill-btn py-2 px-4 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-sticker-size='3.5"'>3.5"</button>
+                <button data-id="101" class="sticker-pill-btn py-2 px-4 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-sticker-size='4"'>4"</button>
+                <button data-id="102" class="sticker-pill-btn py-2 px-4 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-sticker-size='5"'>5"</button>
+                <button data-id="103" class="sticker-pill-btn py-2 px-4 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-sticker-size='6"'>6"</button>
+                <button data-id="104" class="sticker-pill-btn py-2 px-4 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-sticker-size='7"'>7"</button>
+              </div>
+            </div>
+            <div data-id="105">
+              <label data-id="106" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-2 block">Quantity</label>
+              <div data-id="107" id="sticker-qty-pills" class="flex flex-wrap gap-2">
+                <button data-id="108" class="sticker-pill-btn py-2 px-4 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-sticker-qty="10">10</button>
+                <button data-id="109" class="sticker-pill-btn py-2 px-4 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-sticker-qty="25">25</button>
+                <button data-id="110" class="sticker-pill-btn py-2 px-4 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-sticker-qty="50">50</button>
+                <button data-id="111" class="sticker-pill-btn py-2 px-4 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-sticker-qty="100">100</button>
+                <button data-id="112" class="sticker-pill-btn py-2 px-4 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-sticker-qty="200">200</button>
+                <button data-id="113" class="sticker-pill-btn py-2 px-4 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-sticker-qty="500">500</button>
+              </div>
+            </div>
+            <div data-id="114" id="sticker-price-display" class="hidden">
+              <div data-id="115" id="sticker-price-box" class="hidden sticker-price-box">
+                <p data-id="116" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-1">Batch Price</p>
+                <p data-id="117" class="price-value tabular-nums" id="sticker-price-value"></p>
+                <p data-id="118" class="text-xs text-textMuted mt-1 tabular-nums" id="sticker-price-subtitle"></p>
+              </div>
+              <div data-id="119" id="sticker-no-price-warning" class="hidden sticker-price-box" style="border-color:#ef4444;">
+                <p data-id="120" class="text-[11px] font-medium flex items-center justify-center gap-1.5 text-danger">
+                  <i data-id="121" data-lucide="alert-triangle" class="w-3.5 h-3.5"></i>
+                  Pricing not available. Contact for quote.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Corrugated Section -->
+          <div data-id="122" id="corrugated-section" class="hidden flex flex-col gap-4">
+            <div data-id="123">
+              <label data-id="124" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-2 block">Sheet Size</label>
+              <div data-id="125" id="corr-size-pills" class="flex flex-wrap gap-2">
+                <button data-id="126" class="corr-size-btn flex-1 min-w-[100px] py-2.5 px-3 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-corr-size="18x24">18" x 24"</button>
+                <button data-id="127" class="corr-size-btn flex-1 min-w-[100px] py-2.5 px-3 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-corr-size="36x24">36" x 24"</button>
+                <button data-id="128" class="corr-size-btn flex-1 min-w-[100px] py-2.5 px-3 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-corr-size="36x72">36" x 72"</button>
+                <button data-id="129" class="corr-size-btn flex-1 min-w-[100px] py-2.5 px-3 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-corr-size="48x96">48" x 96"</button>
+              </div>
+            </div>
+            <div data-id="130">
+              <label data-id="131" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-2 block">Grommets (Optional)</label>
+              <div data-id="132" class="flex gap-2">
+                <button data-id="133" id="corr-grommet-2-btn" class="corr-size-btn flex-1 py-2 px-3 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-grommet="2">Add 2 Grommets +$2</button>
+                <button data-id="134" id="corr-grommet-4-btn" class="corr-size-btn flex-1 py-2 px-3 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-grommet="4">Add 4 Grommets +$4</button>
+              </div>
+            </div>
+            <div data-id="135">
+              <label data-id="136" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-1.5 block" for="corr-qty-input">Quantity (Sheets)</label>
+              <input data-id="137" id="corr-qty-input" type="number" min="1" step="1" value="1" class="w-full bg-base border border-border rounded-lg px-3.5 py-2.5 text-sm text-textPrimary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent tabular-nums" />
+            </div>
+            <div data-id="138" id="corr-price-preview" class="hidden corr-price-preview">
+              <div data-id="139" class="flex justify-between items-baseline mb-2">
+                <span data-id="140" class="text-xs text-textMuted font-semibold">Per Sheet</span>
+                <span data-id="141" class="per-sheet-price tabular-nums" id="corr-per-sheet-price"></span>
+              </div>
+              <div data-id="142" class="flex justify-between items-baseline mb-2" id="corr-grommet-line" style="display:none;">
+                <span data-id="143" class="text-xs text-textMuted font-semibold" id="corr-grommet-label">Grommets</span>
+                <span data-id="144" class="text-sm font-bold text-textSecondary tabular-nums" id="corr-grommet-value"></span>
+              </div>
+              <div data-id="145" class="border-t border-border/60 my-2"></div>
+              <div data-id="146" class="flex justify-between items-baseline">
+                <span data-id="147" class="text-xs text-textMuted font-semibold" id="corr-subtotal-label">Subtotal (1 sheet)</span>
+                <span data-id="148" class="text-lg font-extrabold text-accent tabular-nums" id="corr-subtotal-price"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prints & Copies Section -->
+          <div data-id="149" id="prints-section" class="hidden flex flex-col gap-4">
+            <div data-id="150">
+              <label data-id="151" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-2 block">Select Service</label>
+              <div data-id="152" id="print-service-list" class="flex flex-col gap-1.5"></div>
+            </div>
+            <div data-id="153" id="print-pages-section" class="hidden">
+              <label data-id="154" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-1.5 block" for="print-pages-input">Number of Pages / Copies</label>
+              <input data-id="155" id="print-pages-input" type="number" min="1" step="1" value="1" class="w-full bg-base border border-border rounded-lg px-3.5 py-2.5 text-sm text-textPrimary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent tabular-nums" />
+            </div>
+            <div data-id="156" id="print-price-preview" class="hidden print-preview-card">
+              <div data-id="157" class="flex justify-between items-baseline mb-1.5">
+                <span data-id="158" class="text-xs text-textMuted font-semibold">Service</span>
+                <span data-id="159" class="text-xs text-textSecondary font-medium" id="print-preview-service"></span>
+              </div>
+              <div data-id="160" class="flex justify-between items-baseline mb-1.5">
+                <span data-id="161" class="text-xs text-textMuted font-semibold">Per Page</span>
+                <span data-id="162" class="text-xs text-textSecondary font-medium tabular-nums" id="print-preview-per-page"></span>
+              </div>
+              <div data-id="163" class="flex justify-between items-baseline mb-1.5">
+                <span data-id="164" class="text-xs text-textMuted font-semibold">Pages</span>
+                <span data-id="165" class="text-xs text-textSecondary font-medium tabular-nums" id="print-preview-pages"></span>
+              </div>
+              <div data-id="166" class="border-t border-border/60 my-2"></div>
+              <div data-id="167" class="flex justify-between items-center">
+                <span data-id="168" class="text-xs text-textMuted font-semibold">Total</span>
+                <span data-id="169" class="print-total-value tabular-nums" id="print-preview-total"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Posters Section -->
+          <div data-id="170" id="posters-section" class="hidden flex flex-col gap-4">
+            <div data-id="171">
+              <label data-id="172" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-2 block">Poster Size</label>
+              <div data-id="173" id="poster-size-pills" class="flex flex-wrap gap-2"></div>
+            </div>
+            <!-- Poster Lamination Toggle (only for expanded 54" sizes) -->
+            <div data-id="174" id="poster-lam-toggle-wrap" class="hidden flex flex-col gap-2">
+              <div data-id="175" class="flex items-center gap-3">
+                <div data-id="176" id="poster-lam-toggle" class="lam-toggle-track" role="switch" aria-checked="false" tabindex="0">
+                  <div data-id="177" class="lam-toggle-thumb"></div>
+                </div>
+                <label data-id="178" class="text-xs font-semibold text-textPrimary cursor-pointer" id="poster-lam-toggle-label">Add Lamination (+$2.00/sq ft)</label>
+              </div>
+              <div data-id="179" id="poster-lam-surcharge-info" class="hidden bg-base/60 rounded-lg px-3 py-2 border border-border/60">
+                <p data-id="180" class="text-[11px] text-textMuted tabular-nums" id="poster-lam-surcharge-text"></p>
+              </div>
+            </div>
+            <div data-id="181" id="poster-qty-section" class="hidden">
+              <label data-id="182" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-1.5 block" for="poster-qty-input">Quantity</label>
+              <input data-id="183" id="poster-qty-input" type="number" min="1" step="1" value="1" class="w-full bg-base border border-border rounded-lg px-3.5 py-2.5 text-sm text-textPrimary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent tabular-nums" />
+            </div>
+            <div data-id="184" id="poster-price-preview" class="hidden poster-price-preview">
+              <div data-id="185" class="flex justify-between items-baseline mb-1.5">
+                <span data-id="186" class="text-xs text-textMuted font-semibold">Size</span>
+                <span data-id="187" class="text-xs text-textSecondary font-medium" id="poster-preview-size"></span>
+              </div>
+              <div data-id="188" class="flex justify-between items-baseline mb-1.5">
+                <span data-id="189" class="text-xs text-textMuted font-semibold">Per Poster</span>
+                <span data-id="190" class="text-xs text-textSecondary font-medium tabular-nums" id="poster-preview-each"></span>
+              </div>
+              <div data-id="191" id="poster-lam-line" class="flex justify-between items-baseline mb-1.5" style="display:none;">
+                <span data-id="192" class="text-xs text-textMuted font-semibold">Lamination</span>
+                <span data-id="193" class="text-xs text-accent font-medium tabular-nums" id="poster-preview-lam"></span>
+              </div>
+              <div data-id="194" class="flex justify-between items-baseline mb-1.5">
+                <span data-id="195" class="text-xs text-textMuted font-semibold">Qty</span>
+                <span data-id="196" class="text-xs text-textSecondary font-medium tabular-nums" id="poster-preview-qty"></span>
+              </div>
+              <div data-id="197" class="border-t border-border/60 my-2"></div>
+              <div data-id="198" class="flex justify-between items-center">
+                <span data-id="199" class="text-xs text-textMuted font-semibold">Total</span>
+                <span data-id="200" class="poster-total-value tabular-nums" id="poster-preview-total"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Labor Section -->
+          <div data-id="201" id="labor-section" class="hidden flex flex-col gap-3">
+            <div data-id="202">
+              <label data-id="203" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-1.5 block" for="labor-desc-input">Description</label>
+              <textarea data-id="204" id="labor-desc-input" rows="3" placeholder="e.g. Installation, design time, vehicle wrap install..." class="w-full bg-base border border-border rounded-lg px-3.5 py-2.5 text-sm text-textPrimary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent resize-none" style="font-family:'Inter',system-ui,sans-serif;"></textarea>
+            </div>
+            <div data-id="205" class="bg-base/60 rounded-lg px-3 py-2 border border-border/60">
+              <p data-id="206" class="text-[11px] text-textMuted tabular-nums flex items-center gap-1.5">
+                <i data-id="207" data-lucide="info" class="w-3.5 h-3.5 text-accent"></i>
+                Rate: $25.00/hr — enter hours in the Labor Hours field below.
+              </p>
+            </div>
+          </div>
+
+          <!-- Design Fee Section -->
+          <div data-id="208" id="designfee-section" class="hidden flex flex-col gap-3">
+            <div data-id="209">
+              <label data-id="210" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-1.5 block" for="designfee-desc-input">Description</label>
+              <textarea data-id="211" id="designfee-desc-input" rows="3" placeholder="e.g. Logo design, layout, artwork edits..." class="w-full bg-base border border-border rounded-lg px-3.5 py-2.5 text-sm text-textPrimary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent resize-none" style="font-family:'Inter',system-ui,sans-serif;"></textarea>
+            </div>
+            <div data-id="212" class="bg-base/60 rounded-lg px-3 py-2 border border-border/60">
+              <p data-id="213" class="text-[11px] text-textMuted tabular-nums flex items-center gap-1.5">
+                <i data-id="214" data-lucide="info" class="w-3.5 h-3.5 text-accent"></i>
+                Rate: $30.00/hr — enter hours in the Labor Hours field below.
+              </p>
+            </div>
+          </div>
+
+          <!-- Scan & Fax Section -->
+          <div data-id="215" id="scanfax-section" class="hidden flex flex-col gap-3">
+            <div data-id="216">
+              <label data-id="217" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-2 block">Service Type</label>
+              <div data-id="218" class="flex gap-2">
+                <button data-id="219" class="scanfax-type-btn active flex-1 py-2.5 px-3 rounded-lg text-xs font-bold border border-border cursor-pointer text-center" data-sftype="fax">Fax</button>
+                <button data-id="220" class="scanfax-type-btn flex-1 py-2.5 px-3 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center" data-sftype="scan">Scan to PDF &amp; Email</button>
+              </div>
+            </div>
+            <div data-id="221">
+              <label data-id="222" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-1.5 block" for="scanfax-pages-input">Number of Pages</label>
+              <input data-id="223" id="scanfax-pages-input" type="number" min="1" step="1" value="1" class="w-full bg-base border border-border rounded-lg px-3.5 py-2.5 text-sm text-textPrimary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent tabular-nums" />
+            </div>
+            <div data-id="224" id="scanfax-price-preview" class="hidden scanfax-price-preview">
+              <p data-id="225" class="text-lg font-extrabold text-accent tabular-nums" id="scanfax-price-text"></p>
+              <p data-id="226" class="text-[11px] text-textMuted tabular-nums mt-1" id="scanfax-rate-text"></p>
+            </div>
+          </div>
+
+          <!-- Measurement Toggle + Input (for roll materials) -->
+          <div data-id="227" id="step3-meas" class="hidden">
+            <label data-id="228" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-1.5 block">Measurement</label>
+            <div data-id="229" class="flex gap-2 mb-2">
+              <button data-id="230" class="unit-btn active flex-1 py-1.5 rounded-lg text-xs font-semibold border border-border cursor-pointer transition-all" data-unit="ft">Linear Feet</button>
+              <button data-id="231" class="unit-btn flex-1 py-1.5 rounded-lg text-xs font-semibold border border-border text-textMuted cursor-pointer transition-all" data-unit="in">Linear Inches</button>
+            </div>
+            <div data-id="232" class="relative">
+              <input data-id="233" id="measurement-input" type="number" min="0.1" max="40" step="any" placeholder="Enter quantity..." class="w-full bg-base border border-border rounded-lg px-3.5 py-2.5 text-sm text-textPrimary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent tabular-nums pr-10" />
+              <span data-id="234" id="unit-label" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-medium text-textDim">ft</span>
+            </div>
+            <p data-id="235" id="measurement-clamp-msg" class="validation-clamp-msg">&#x26A0; Max length is 40 ft. Value clamped.</p>
+          </div>
+
+          <!-- Lamination Toggle -->
+          <div data-id="236" id="lam-toggle-wrap" class="hidden flex flex-col gap-2">
+            <div data-id="237" class="flex items-center gap-3">
+              <div data-id="238" id="lam-toggle" class="lam-toggle-track" role="switch" aria-checked="false" tabindex="0">
+                <div data-id="239" class="lam-toggle-thumb"></div>
+              </div>
+              <label data-id="240" class="text-xs font-semibold text-textPrimary cursor-pointer" id="lam-toggle-label">Add Lamination</label>
+            </div>
+            <div data-id="241" id="lam-surcharge-info" class="hidden bg-base/60 rounded-lg px-3 py-2 border border-border/60">
+              <p data-id="242" class="text-[11px] text-textMuted tabular-nums" id="lam-surcharge-text"></p>
+            </div>
+          </div>
+
+          <!-- Canvas H×W Inputs -->
+          <div data-id="243" id="canvas-hw-section" class="hidden flex flex-col gap-3">
+            <label data-id="244" class="text-[10px] font-semibold uppercase tracking-wider text-textDim block">Canvas Dimensions</label>
+            <div data-id="245" class="flex gap-3">
+              <div data-id="246" class="flex-1">
+                <label data-id="247" class="text-[10px] text-textDim mb-1 block" for="canvas-height-input">Height (inches)</label>
+                <div data-id="248" class="relative">
+                  <input data-id="249" id="canvas-height-input" type="number" min="1" step="0.5" placeholder="e.g. 16" class="w-full bg-base border border-border rounded-lg px-3.5 py-2.5 text-sm text-textPrimary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent tabular-nums pr-10" />
+                  <span data-id="250" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-medium text-textDim">in</span>
+                </div>
+              </div>
+              <div data-id="251" class="flex-1">
+                <label data-id="252" class="text-[10px] text-textDim mb-1 block" for="canvas-width-input">Width (inches)</label>
+                <div data-id="253" class="relative">
+                  <input data-id="254" id="canvas-width-input" type="number" min="1" step="0.5" placeholder="e.g. 20" class="w-full bg-base border border-border rounded-lg px-3.5 py-2.5 text-sm text-textPrimary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent tabular-nums pr-10" />
+                  <span data-id="255" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-medium text-textDim">in</span>
+                </div>
+              </div>
+            </div>
+            <div data-id="256" id="canvas-live-info" class="hidden bg-base/60 rounded-lg px-3 py-2.5 border border-border/60">
+              <p data-id="257" class="text-[11px] text-textMuted tabular-nums" id="canvas-live-info-text"></p>
+            </div>
+          </div>
+
+          <!-- Fixed Cost Display for Tubes -->
+          <div data-id="258" id="tube-fixed-cost-display" class="hidden mt-0 bg-base/60 rounded-lg px-3 py-2.5 border border-border/60">
+            <p data-id="259" class="text-[11px] text-textMuted tabular-nums flex items-center gap-1.5">
+              <i data-id="260" data-lucide="tag" class="w-3.5 h-3.5 text-accent"></i>
+              <span data-id="261" id="tube-fixed-cost-text">Fixed Cost: $0.00 per unit</span>
+            </p>
+          </div>
+
+          <!-- Number of Pieces -->
+          <div data-id="262" id="step4-pcs" class="hidden">
+            <label data-id="263" class="text-[10px] font-semibold uppercase tracking-wider text-textDim mb-1.5 block" for="qty-input">Number of Pieces</label>
+            <input data-id="264" id="qty-input" type="number" min="1" step="1" value="1" class="w-full bg-base border border-border rounded-lg px-3.5 py-2.5 text-sm text-textPrimary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent tabular-nums" />
+          </div>
+
+          <!-- Labor Hours -->
+          <div data-id="265" id="order-labor-card" class="hidden labor-order-card rounded-xl p-4 md:p-5 flex flex-col gap-2">
+            <label data-id="266" class="text-sm font-semibold text-textPrimary flex items-center gap-2" for="order-labor-hours-input">
+              <i data-id="267" data-lucide="clock" class="w-4 h-4 text-accent"></i>
+              Labor Hours
+            </label>
+            <p data-id="268" class="text-[10px] text-textDim">Enter hours worked for this item</p>
+            <div data-id="269" class="relative mt-1">
+              <input data-id="270" id="order-labor-hours-input" type="number" min="0" step="0.5" placeholder="e.g. 2.5" class="w-full bg-base border border-border rounded-lg px-3.5 py-2.5 text-sm text-textPrimary focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent tabular-nums pr-10" />
+              <span data-id="271" class="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-medium text-textDim">hrs</span>
+            </div>
+          </div>
+
+          <!-- Validation Error -->
+          <p data-id="272" id="add-error" class="hidden text-xs text-danger flex items-center gap-1">
+            <i data-id="273" data-lucide="alert-circle" class="w-3 h-3"></i>
+            <span data-id="274" id="add-error-text">Please select a material and enter a valid measurement</span>
+          </p>
+
+          <!-- Add to Job Button -->
+          <button data-id="275" id="add-btn" class="w-full bg-accent hover:bg-accentHover text-white font-bold py-3 rounded-lg text-sm transition-colors cursor-pointer shadow-lg shadow-accent/20 flex items-center justify-center gap-2">
+            <i data-id="276" data-lucide="plus" class="w-4 h-4"></i>
+            ADD TO JOB
+          </button>
+        </div>
+
+        <!-- Current Job Items -->
+        <div data-id="277" class="flex flex-col gap-3 flex-1 min-h-0">
+          <div data-id="278" class="flex items-center gap-2">
+            <h2 data-id="279" class="text-sm font-semibold text-textPrimary">Current Job Items</h2>
+            <span data-id="280" id="job-count-badge" class="hidden w-5 h-5 rounded-full bg-accent text-white text-[10px] font-bold flex items-center justify-center">0</span>
+          </div>
+          <div data-id="281" id="job-items-list" class="flex flex-col gap-2 overflow-y-auto scrollbar-thin flex-1 min-h-[60px]">
+            <div data-id="282" id="job-empty-state" class="flex flex-col items-center justify-center py-6 text-center gap-2">
+              <i data-id="283" data-lucide="clipboard-list" class="w-6 h-6 text-textDim"></i>
+              <p data-id="284" class="text-xs text-textDim">No items added yet</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- RIGHT PANEL -->
+      <section data-id="285" class="w-full lg:w-[58%] xl:w-[62%] bg-base p-5 md:p-7 lg:p-8 flex flex-col gap-5 lg:overflow-y-auto scrollbar-thin">
+        <div data-id="286" class="flex items-center justify-between">
+          <h2 data-id="287" class="text-lg font-bold text-textPrimary flex items-center gap-2">
+            <i data-id="288" data-lucide="file-text" class="w-5 h-5 text-accent"></i>
+            Job Summary
+          </h2>
+          <button data-id="289" id="clear-all-btn" class="hidden text-xs font-medium text-danger hover:text-dangerHover cursor-pointer flex items-center gap-1 transition-colors">
+            <i data-id="290" data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            Clear All
+          </button>
+        </div>
+
+        <!-- Empty State -->
+        <div data-id="291" id="empty-state" class="flex-1 flex flex-col items-center justify-center text-center gap-4 py-12">
+          <div data-id="292" class="w-16 h-16 rounded-2xl bg-card border border-border flex items-center justify-center">
+            <i data-id="293" data-lucide="clipboard-list" class="w-8 h-8 text-textDim"></i>
+          </div>
+          <div data-id="294">
+            <p data-id="295" class="text-textMuted text-sm">Add materials to build your job quote</p>
+            <p data-id="296" class="text-textDim text-xs mt-1">Use the form on the left to add line items</p>
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div data-id="297" id="results-container" class="hidden flex-1 flex flex-col gap-5">
+          <div data-id="298" class="bg-card border border-border rounded-xl overflow-hidden fade-in">
+            <div data-id="299" class="px-4 py-3 border-b border-border">
+              <h3 data-id="300" class="text-xs font-semibold uppercase tracking-wider text-textMuted flex items-center gap-2">
+                <i data-id="301" data-lucide="list" class="w-3.5 h-3.5"></i>
+                Itemized Breakdown
+              </h3>
+            </div>
+            <div data-id="302" class="overflow-x-auto">
+              <table data-id="303" class="w-full text-left text-sm">
+                <thead data-id="304" class="bg-base/60 text-[10px] font-semibold uppercase tracking-wider text-textDim">
+                  <tr data-id="305">
+                    <th data-id="306" class="px-4 py-2.5 w-[28px]"></th>
+                    <th data-id="307" class="px-4 py-2.5">Material</th>
+                    <th data-id="308" class="px-4 py-2.5 text-right">Details</th>
+                    <th data-id="309" class="px-4 py-2.5 text-right">Mat. Cost</th>
+                    <th data-id="310" class="px-4 py-2.5 text-right">Line Total</th>
+                    <th data-id="311" class="px-4 py-2.5 text-right text-green-400">Margin $</th>
+                    <th data-id="312" class="px-4 py-2.5 text-right text-green-400">Margin %</th>
+                  </tr>
+                </thead>
+                <tbody data-id="313" id="summary-table-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div data-id="314" class="bg-card border border-border rounded-xl p-5 md:p-6 fade-in">
+            <div data-id="315" id="grand-total-inner" class="space-y-3 text-sm"></div>
+          </div>
+
+          <div data-id="316" class="fade-in flex flex-col gap-3">
+            <button data-id="317" id="customer-info-btn" class="customer-info-btn">
+              <i data-id="318" data-lucide="user" class="w-4 h-4"></i>
+              Customer Info
+              <span data-id="319" id="customer-info-badge" class="customer-info-badge"></span>
+            </button>
+            <button data-id="320" id="discount-btn" class="discount-btn">
+              <i data-id="321" data-lucide="percent" class="w-4 h-4"></i>
+              Discount
+              <span data-id="322" id="discount-active-badge" class="discount-active-badge"></span>
+            </button>
+            <button data-id="323" id="misc-btn" class="misc-btn">
+              <i data-id="324" data-lucide="angry" class="w-4 h-4"></i>
+              FUCK YOU
+              <span data-id="325" id="misc-badge" class="misc-active-badge"></span>
+            </button>
+            <button data-id="326" id="tax-exempt-btn" class="tax-exempt-btn">
+              <i data-id="327" data-lucide="shield-off" class="w-4 h-4"></i>
+              Tax Exempt
+              <span data-id="328" id="tax-exempt-badge" class="tax-exempt-active-badge"></span>
+            </button>
+            <button data-id="329" id="print-quote-btn" class="print-quote-btn" disabled>
+              <i data-id="330" data-lucide="printer" class="w-4 h-4"></i>
+              Print Quote
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer data-id="331" class="bg-card border-t border-border py-3 px-5 text-center">
+      <p data-id="332" class="text-xs text-textDim">Pack-N-Fax Navarre · Pricing Tool</p>
+    </footer>
+
+    <script>
+    // ═══════════════════════════════════════════════════════════════
+    // PACK-N-FAX MATERIAL PRICING TOOL — FULL JAVASCRIPT
+    // ═══════════════════════════════════════════════════════════════
+
+    if (typeof lucide !== "undefined" && typeof lucide.createIcons === "function") {
+      lucide.createIcons();
+    }
+
+    // ── PACK-N-FAX LOGO — Use the real uploaded logo via the hidden <img> tag ──
+    function getLogoSrc() {
+      var img = document.getElementById('pnf-logo-img');
+      if (img && img.src) {
+        try {
+          var canvas = document.createElement('canvas');
+          canvas.width = img.naturalWidth || 320;
+          canvas.height = img.naturalHeight || 320;
+          var ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0);
+          return canvas.toDataURL('image/png');
+        } catch(e) {
+          return img.src;
+        }
+      }
+      return "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80"><rect width="320" height="80" rx="8" fill="#1e293b"/><text x="160" y="38" text-anchor="middle" font-family="Arial,sans-serif" font-weight="800" font-size="28" fill="#f97316">PACK-N-FAX</text><text x="160" y="58" text-anchor="middle" font-family="Arial,sans-serif" font-weight="600" font-size="12" fill="#94a3b8">Navarre, FL</text></svg>');
+    }
+
+    // ── MATERIAL DATABASE ──────────────────────────────────────────
+    const LABOR_RATE = 25;
+    const DESIGN_FEE_RATE = 30;
+    const TAX_RATE = 0.07; // 7% Navarre FL sales tax
+
+    const MATERIALS = [
+      { id: 'perf-50-36', name: '50/50 Window Perforated Vinyl (36")', category: '50/50 Window Perforated', costPerFt: 3.89, retailPerFt: 11.67, width: 36, unit: 'ft', type: 'roll' },
+      { id: 'perf-50-54', name: '50/50 Window Perforated Vinyl (54")', category: '50/50 Window Perforated', costPerFt: 5.81, retailPerFt: 17.43, width: 54, unit: 'ft', type: 'roll' },
+      { id: 'air-rel-gloss-30', name: 'Air Release Gloss Vinyl (30")', category: 'Air Release', costPerFt: 1.00, retailPerFt: 4.00, width: 30, unit: 'ft', type: 'roll' },
+      { id: 'air-rel-gloss-54', name: 'Air Release Gloss Vinyl (54")', category: 'Air Release', costPerFt: 1.80, retailPerFt: 7.00, width: 54, unit: 'ft', type: 'roll' },
+      { id: 'air-rel-matte-30', name: 'Air Release Matte Vinyl (30")', category: 'Air Release', costPerFt: 1.00, retailPerFt: 4.00, width: 30, unit: 'ft', type: 'roll' },
+      { id: 'air-rel-matte-54', name: 'Air Release Matte Vinyl (54")', category: 'Air Release', costPerFt: 1.80, retailPerFt: 7.00, width: 54, unit: 'ft', type: 'roll' },
+      { id: 'banner-material', name: 'Banner (Hemmed)', category: 'Banner', type: 'banner' },
+      { id: 'canvas-print', name: 'Canvas Print (w/ Frame)', category: 'Canvas', type: 'canvas', costPerSqIn: 0.04, retailPerSqIn: 0.14 },
+      { id: 'cast-gloss-54', name: 'Cast Gloss Vinyl (54")', category: 'Cast', costPerFt: 3.00, retailPerFt: 10.00, width: 54, unit: 'ft', type: 'roll' },
+      { id: 'cast-matte-54', name: 'Cast Matte Vinyl (54")', category: 'Cast', costPerFt: 3.00, retailPerFt: 10.00, width: 54, unit: 'ft', type: 'roll' },
+      { id: 'corrugated-sign', name: 'Corrugated Plastic Sign', category: 'Corrugated', type: 'corrugated' },
+      { id: 'die-cut-24', name: 'Die Cut Vinyl (24")', category: 'Die Cut', costPerFt: 0.60, retailPerFt: 3.50, width: 24, unit: 'ft', type: 'roll' },
+      { id: 'lam-gloss-30', name: 'Gloss Laminate (30")', category: 'Laminate', costPerFt: 0.65, retailPerFt: 2.25, width: 30, unit: 'ft', type: 'roll', isLaminate: true },
+      { id: 'lam-gloss-54', name: 'Gloss Laminate (54")', category: 'Laminate', costPerFt: 1.20, retailPerFt: 4.00, width: 54, unit: 'ft', type: 'roll', isLaminate: true },
+      { id: 'lam-matte-30', name: 'Matte Laminate (30")', category: 'Laminate', costPerFt: 0.65, retailPerFt: 2.25, width: 30, unit: 'ft', type: 'roll', isLaminate: true },
+      { id: 'lam-matte-54', name: 'Matte Laminate (54")', category: 'Laminate', costPerFt: 1.20, retailPerFt: 4.00, width: 54, unit: 'ft', type: 'roll', isLaminate: true },
+      { id: 'non-air-gloss-30', name: 'Non-Air Release Gloss (30")', category: 'Non-Air Release', costPerFt: 0.75, retailPerFt: 3.50, width: 30, unit: 'ft', type: 'roll' },
+      { id: 'non-air-gloss-54', name: 'Non-Air Release Gloss (54")', category: 'Non-Air Release', costPerFt: 1.40, retailPerFt: 6.00, width: 54, unit: 'ft', type: 'roll' },
+      { id: 'non-air-matte-30', name: 'Non-Air Release Matte (30")', category: 'Non-Air Release', costPerFt: 0.75, retailPerFt: 3.50, width: 30, unit: 'ft', type: 'roll' },
+      { id: 'non-air-matte-54', name: 'Non-Air Release Matte (54")', category: 'Non-Air Release', costPerFt: 1.40, retailPerFt: 6.00, width: 54, unit: 'ft', type: 'roll' },
+      { id: 'perf-banner', name: 'Perforated Mesh Banner', category: 'Perforated Banner', costPerFt: 2.20, retailPerFt: 9.00, width: 54, unit: 'ft', type: 'roll' },
+      { id: 'poster', name: 'Poster Print', category: 'Posters', type: 'poster' },
+      { id: 'prints-copies', name: 'Print / Copy Service', category: 'Prints & Copies', type: 'prints' },
+      { id: 'sticker', name: 'Custom Stickers', category: 'Stickers', type: 'sticker' },
+      { id: 'tape-12', name: 'Transfer Tape (12")', category: 'Tape', costPerFt: 0.25, retailPerFt: 1.50, width: 12, unit: 'ft', type: 'roll' },
+      { id: 'tape-24', name: 'Transfer Tape (24")', category: 'Tape', costPerFt: 0.40, retailPerFt: 2.00, width: 24, unit: 'ft', type: 'roll' },
+      { id: 'tube-sm', name: 'Tube — Small', category: 'Tubes', fixedCost: 1.50, fixedRetail: 3.00, type: 'fixed' },
+      { id: 'tube-lg', name: 'Tube — Large', category: 'Tubes', fixedCost: 2.50, fixedRetail: 5.00, type: 'fixed' },
+      { id: 'labor-only', name: 'Labor', category: 'Labor', type: 'labor' },
+      { id: 'design-fee', name: 'Design Fee', category: 'Design Fee', type: 'designfee' },
+      { id: 'scan-fax', name: 'Scan & Fax', category: 'Scan & Fax', type: 'scanfax' },
+    ];
+
+    const BANNER_TIERS = {
+      '38" Standard': [
+        { minFt: 3, maxFt: 5, retail: 11.75, cost: 0.87 },
+        { minFt: 5.5, maxFt: 10, retail: 14.00, cost: 0.87 },
+        { minFt: 10.5, maxFt: 20, retail: 15.50, cost: 0.87 },
+        { minFt: 20.5, maxFt: 40, retail: 16.00, cost: 0.87 },
+      ],
+      '54" Standard': [
+        { minFt: 3, maxFt: 5, retail: 18.75, cost: 0.97 },
+        { minFt: 5.5, maxFt: 10, retail: 21.00, cost: 0.97 },
+        { minFt: 10.5, maxFt: 20, retail: 22.50, cost: 0.97 },
+        { minFt: 20.5, maxFt: 40, retail: 23.00, cost: 0.97 },
+      ],
+      '54" Laminated': [
+        { minFt: 3, maxFt: 5, retail: 21.75, cost: 2.10 },
+        { minFt: 5.5, maxFt: 10, retail: 24.00, cost: 2.10 },
+        { minFt: 10.5, maxFt: 20, retail: 25.50, cost: 2.10 },
+        { minFt: 20.5, maxFt: 40, retail: 26.00, cost: 2.10 },
+      ],
+    };
+
+    const STICKER_PRICING = {
+      '2"':   { 10: 20, 25: 37.50, 50: 60, 100: 100, 200: null, 500: null, cost: 0.40 },
+      '3"':   { 10: 25, 25: 50, 50: 75, 100: 130, 200: 220, 500: null, cost: 0.55 },
+      '3.5"': { 10: 30, 25: 56.25, 50: 87.50, 100: 150, 200: 260, 500: 550, cost: 0.65 },
+      '4"':   { 10: 35, 25: 62.50, 50: 100, 100: 175, 200: 300, 500: 625, cost: 0.75 },
+      '5"':   { 10: 45, 25: 81.25, 50: 125, 100: 225, 200: 400, 500: 875, cost: 1.00 },
+      '6"':   { 10: 55, 25: 100, 50: 162.50, 100: 300, 200: 500, 500: 1100, cost: 1.30 },
+      '7"':   { 10: 65, 25: 125, 50: 200, 100: 375, 200: 650, 500: 1375, cost: 1.60 },
+    };
+
+    const CORR_PRICING = {
+      '18x24': { retail: 25.00, cost: 8.00, label: '18" × 24"' },
+      '36x24': { retail: 40.00, cost: 14.00, label: '36" × 24"' },
+      '36x72': { retail: 90.00, cost: 30.00, label: '36" × 72"' },
+      '48x96': { retail: 150.00, cost: 50.00, label: '48" × 96"' },
+    };
+
+    const PRINT_SERVICES = [
+      { id: 'bw-plain', name: 'B/W (Plain 20lb)', perPage: 0.25, cost: 0.023 },
+      { id: 'color-plain', name: 'Color (Plain 20lb)', perPage: 0.69, cost: 0.027 },
+      { id: 'premium-bw', name: 'Premium Paper B/W', perPage: 0.50, cost: 0.037 },
+      { id: 'premium-color', name: 'Premium Paper Color', perPage: 1.40, cost: 0.033 },
+      { id: 'cardstock-bw', name: 'Card Stock B/W', perPage: 1.00, cost: 0.063 },
+      { id: 'cardstock-color', name: 'Card Stock Color', perPage: 1.50, cost: 0.067 },
+      { id: 'cardstock-color-ds', name: 'Card Stock Color — Double Sided', perPage: 1.75, cost: 0.070 },
+      { id: 'gloss-flyer', name: 'Gloss Flyer / Photo', perPage: 1.50, cost: 0.175 },
+      { id: 'colored-paper', name: 'On Colored Paper', perPage: 0.50, cost: 0.035 },
+      { id: 'brochures', name: 'Brochures', perPage: 2.00, cost: 0.175 },
+    ];
+
+    const POSTER_SIZES = [
+      { id: '11x17', label: '11" × 17"', retail: 8.00, cost: 2.50, expanded: false },
+      { id: '18x24', label: '18" × 24"', retail: 15.00, cost: 5.00, expanded: false },
+      { id: '24x36', label: '24" × 36"', retail: 25.00, cost: 8.00, expanded: false },
+      { id: '36x48', label: '36" × 48"', retail: 45.00, cost: 15.00, expanded: false },
+      { id: '36x54', label: '36" × 54"', retail: 55.00, cost: 18.00, expanded: true },
+      { id: '42x54', label: '42" × 54"', retail: 65.00, cost: 22.00, expanded: true },
+      { id: '40x60', label: '40" × 60"', retail: 70.00, cost: 24.00, expanded: true },
+    ];
+
+    const POSTER_LAM_PER_SQFT = 2.00;
+    const POSTER_LAM_COST_PER_SQFT = 0.60;
+
+    const POSTER_SQFT = {
+      '36x54': (36 * 54) / 144,
+      '42x54': (42 * 54) / 144,
+      '40x60': (40 * 60) / 144,
+    };
+
+    // ── STATE ──────────────────────────────────────────────────────
+    let jobItems = [];
+    let selectedCategory = 'All';
+    let selectedUnit = 'ft';
+    let selectedBannerType = '38" Standard';
+    let bannerLamOn = false;
+    let lamToggleOn = false;
+    let posterLamOn = false;
+    let selectedStickerSize = null;
+    let selectedStickerQty = null;
+    let selectedCorrSize = null;
+    let selectedGrommet = 0;
+    let selectedPrintService = null;
+    let selectedPosterSize = null;
+    let customerInfo = { name: '', phone: '', email: '' };
+    let discountPct = 0;
+    let discountType = 'pct';
+    let discountAmt = 0;
+    let taxExempt = false;
+    let miscSurcharge = false;
+    let preparedBy = '';
+    let markupPct = 0;
+    let selectedScanFaxType = 'fax';
+
+    // ── DOM REFS ──────────────────────────────────────────────────
+    const $catPills = document.getElementById('category-pills');
+    const $matSelect = document.getElementById('material-select');
+    const $matInfo = document.getElementById('material-info');
+    const $matInfoText = document.getElementById('material-info-text');
+    const $step3 = document.getElementById('step3-meas');
+    const $measInput = document.getElementById('measurement-input');
+    const $unitLabel = document.getElementById('unit-label');
+    const $measClamp = document.getElementById('measurement-clamp-msg');
+    const $step4 = document.getElementById('step4-pcs');
+    const $qtyInput = document.getElementById('qty-input');
+    const $lamWrap = document.getElementById('lam-toggle-wrap');
+    const $lamToggle = document.getElementById('lam-toggle');
+    const $lamSurchargeInfo = document.getElementById('lam-surcharge-info');
+    const $lamSurchargeText = document.getElementById('lam-surcharge-text');
+    const $bannerSection = document.getElementById('banner-section');
+    const $bannerLengthInput = document.getElementById('banner-length-input');
+    const $bannerClamp = document.getElementById('banner-length-clamp-msg');
+    const $bannerTierBadge = document.getElementById('banner-tier-badge');
+    const $bannerTierBadgeText = document.getElementById('banner-tier-badge-text');
+    const $bannerWarning = document.getElementById('banner-length-warning');
+    const $bannerCostPreview = document.getElementById('banner-cost-preview');
+    const $bannerCostPreviewText = document.getElementById('banner-cost-preview-text');
+    const $bannerLamToggleWrap = document.getElementById('banner-lam-toggle-wrap');
+    const $bannerLamToggle = document.getElementById('banner-lam-toggle');
+    const $bannerLamAutoInfo = document.getElementById('banner-lam-auto-info');
+    const $bannerLamAutoText = document.getElementById('banner-lam-auto-text');
+    const $stickerSection = document.getElementById('sticker-section');
+    const $stickerPriceDisplay = document.getElementById('sticker-price-display');
+    const $stickerPriceBox = document.getElementById('sticker-price-box');
+    const $stickerPriceValue = document.getElementById('sticker-price-value');
+    const $stickerPriceSubtitle = document.getElementById('sticker-price-subtitle');
+    const $stickerNoPriceWarning = document.getElementById('sticker-no-price-warning');
+    const $corrSection = document.getElementById('corrugated-section');
+    const $corrPricePreview = document.getElementById('corr-price-preview');
+    const $corrPerSheet = document.getElementById('corr-per-sheet-price');
+    const $corrGrommetLine = document.getElementById('corr-grommet-line');
+    const $corrGrommetLabel = document.getElementById('corr-grommet-label');
+    const $corrGrommetValue = document.getElementById('corr-grommet-value');
+    const $corrSubtotalLabel = document.getElementById('corr-subtotal-label');
+    const $corrSubtotalPrice = document.getElementById('corr-subtotal-price');
+    const $corrQtyInput = document.getElementById('corr-qty-input');
+    const $printsSection = document.getElementById('prints-section');
+    const $printServiceList = document.getElementById('print-service-list');
+    const $printPagesSection = document.getElementById('print-pages-section');
+    const $printPagesInput = document.getElementById('print-pages-input');
+    const $printPricePreview = document.getElementById('print-price-preview');
+    const $printPreviewService = document.getElementById('print-preview-service');
+    const $printPreviewPerPage = document.getElementById('print-preview-per-page');
+    const $printPreviewPages = document.getElementById('print-preview-pages');
+    const $printPreviewTotal = document.getElementById('print-preview-total');
+    const $postersSection = document.getElementById('posters-section');
+    const $posterSizePills = document.getElementById('poster-size-pills');
+    const $posterQtySection = document.getElementById('poster-qty-section');
+    const $posterQtyInput = document.getElementById('poster-qty-input');
+    const $posterPricePreview = document.getElementById('poster-price-preview');
+    const $posterPreviewSize = document.getElementById('poster-preview-size');
+    const $posterPreviewEach = document.getElementById('poster-preview-each');
+    const $posterPreviewQty = document.getElementById('poster-preview-qty');
+    const $posterPreviewTotal = document.getElementById('poster-preview-total');
+    const $posterLamToggleWrap = document.getElementById('poster-lam-toggle-wrap');
+    const $posterLamToggle = document.getElementById('poster-lam-toggle');
+    const $posterLamSurchargeInfo = document.getElementById('poster-lam-surcharge-info');
+    const $posterLamSurchargeText = document.getElementById('poster-lam-surcharge-text');
+    const $posterLamLine = document.getElementById('poster-lam-line');
+    const $posterPreviewLam = document.getElementById('poster-preview-lam');
+    const $canvasSection = document.getElementById('canvas-hw-section');
+    const $canvasH = document.getElementById('canvas-height-input');
+    const $canvasW = document.getElementById('canvas-width-input');
+    const $canvasLiveInfo = document.getElementById('canvas-live-info');
+    const $canvasLiveInfoText = document.getElementById('canvas-live-info-text');
+    const $tubeFixedDisplay = document.getElementById('tube-fixed-cost-display');
+    const $tubeFixedText = document.getElementById('tube-fixed-cost-text');
+    const $laborSection = document.getElementById('labor-section');
+    const $laborDescInput = document.getElementById('labor-desc-input');
+    const $designFeeSection = document.getElementById('designfee-section');
+    const $designFeeDescInput = document.getElementById('designfee-desc-input');
+    const $scanFaxSection = document.getElementById('scanfax-section');
+    const $scanFaxPagesInput = document.getElementById('scanfax-pages-input');
+    const $scanFaxPricePreview = document.getElementById('scanfax-price-preview');
+    const $scanFaxPriceText = document.getElementById('scanfax-price-text');
+    const $scanFaxRateText = document.getElementById('scanfax-rate-text');
+    const $laborCard = document.getElementById('order-labor-card');
+    const $laborInput = document.getElementById('order-labor-hours-input');
+    const $addError = document.getElementById('add-error');
+    const $addErrorText = document.getElementById('add-error-text');
+    const $addBtn = document.getElementById('add-btn');
+    const $jobList = document.getElementById('job-items-list');
+    const $jobEmpty = document.getElementById('job-empty-state');
+    const $jobCountBadge = document.getElementById('job-count-badge');
+    const $emptyState = document.getElementById('empty-state');
+    const $resultsContainer = document.getElementById('results-container');
+    const $summaryBody = document.getElementById('summary-table-body');
+    const $grandTotalInner = document.getElementById('grand-total-inner');
+    const $clearAllBtn = document.getElementById('clear-all-btn');
+    const $printQuoteBtn = document.getElementById('print-quote-btn');
+    const $quoteOverlay = document.getElementById('quote-overlay');
+
+    // ── HELPERS ────────────────────────────────────────────────────
+    const fmt = (n) => '$' + (Number(n) || 0).toFixed(2);
+    const hide = (el) => el.classList.add('hidden');
+    const show = (el) => el.classList.remove('hidden');
+
+    function getMaterial(id) { return MATERIALS.find(m => m.id === id); }
+
+    // ── CATEGORY PILLS ────────────────────────────────────────────
+    const categories = ['All', ...new Set(MATERIALS.map(m => m.category))];
+    const categoryTooltips = {
+      'Design Fee': 'Graphic design, layout, artwork — $30/hr',
+      'All': 'Show all available materials across every category',
+      '50/50 Window Perforated': 'Perforated vinyl — 50% ink, 50% see-through. For window graphics.',
+      'Air Release': 'Premium vinyl with micro air-release channels for bubble-free application.',
+      'Banner': 'Hemmed banner material priced per linear foot with tiered pricing.',
+      'Canvas': 'Fine art canvas prints with wood frame.',
+      'Cast': 'High-quality, long-term cast vinyl film.',
+      'Corrugated': 'Corrugated plastic sign sheets with vinyl and laminate included.',
+      'Die Cut': 'Precision-cut vinyl rolls for contour-cut decals and lettering.',
+      'Laminate': 'Protective overlaminate film applied over printed vinyl.',
+      'Non-Air Release': 'Standard vinyl without air-release channels.',
+      'Perforated Banner': 'Perforated mesh banner material.',
+      'Posters': 'Wide-format poster prints. Fixed pricing per size.',
+      'Prints & Copies': 'Standard print and copy services. Per-page pricing.',
+      'Stickers': 'Custom-cut stickers with quantity-based tiered pricing.',
+      'Tape': 'Application transfer tape used to transfer cut vinyl.',
+      'Tubes': 'Cardboard core tubes for rolling finished prints.',
+      'Labor': 'Standalone labor charge — enter a description and hours at $25/hr.',
+      'Scan & Fax': 'Fax: $1.50 first page, $0.50 each additional. Scan to PDF & Email: $0.50/page.',
+    };
+
+    categories.forEach(cat => {
+      const btn = document.createElement('button');
+      btn.className = `pill-btn px-3 py-1 rounded-full text-xs font-medium bg-card border border-border cursor-pointer ${cat === 'All' ? 'active' : 'text-textMuted'}`;
+      btn.textContent = cat;
+      btn.dataset.category = cat;
+      btn.dataset.tooltip = categoryTooltips[cat] || '';
+      $catPills.appendChild(btn);
+    });
+
+    const $tooltip = document.getElementById('pill-tooltip');
+    const $tooltipText = document.getElementById('pill-tooltip-text');
+    let tooltipTimer = null;
+
+    $catPills.addEventListener('mouseover', (e) => {
+      const btn = e.target.closest('.pill-btn');
+      if (!btn || !btn.dataset.tooltip) return;
+      clearTimeout(tooltipTimer);
+      tooltipTimer = setTimeout(() => {
+        $tooltipText.textContent = btn.dataset.tooltip;
+        $tooltip.style.display = 'block';
+        const rect = btn.getBoundingClientRect();
+        $tooltip.style.left = (rect.left + rect.width / 2 - $tooltip.offsetWidth / 2) + 'px';
+        $tooltip.style.top = (rect.top - $tooltip.offsetHeight - 8) + 'px';
+        $tooltip.classList.add('visible');
+      }, 400);
+    });
+    $catPills.addEventListener('mouseout', () => {
+      clearTimeout(tooltipTimer);
+      $tooltip.classList.remove('visible');
+      setTimeout(() => { $tooltip.style.display = 'none'; }, 150);
+    });
+
+    $catPills.addEventListener('click', (e) => {
+      const btn = e.target.closest('.pill-btn');
+      if (!btn) return;
+      $catPills.querySelectorAll('.pill-btn').forEach(b => { b.classList.remove('active'); b.classList.add('text-textMuted'); });
+      btn.classList.add('active');
+      btn.classList.remove('text-textMuted');
+      selectedCategory = btn.dataset.category;
+      populateMaterialDropdown();
+      resetFormFields();
+    });
+
+    function populateMaterialDropdown() {
+      const filtered = selectedCategory === 'All' ? MATERIALS : MATERIALS.filter(m => m.category === selectedCategory);
+      $matSelect.innerHTML = '<option value="">— Choose a material —</option>';
+      filtered.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = m.name;
+        $matSelect.appendChild(opt);
+      });
+      hide($matInfo);
+    }
+    populateMaterialDropdown();
+
+    // ── MATERIAL SELECT CHANGE ────────────────────────────────────
+    $matSelect.addEventListener('change', () => {
+      resetFormFields();
+      const mat = getMaterial($matSelect.value);
+      if (!mat) return;
+
+      showMaterialInfo(mat);
+
+      if (mat.type === 'roll') {
+        show($step3); show($step4); show($laborCard);
+        if (!mat.isLaminate) show($lamWrap);
+      } else if (mat.type === 'banner') {
+        show($bannerSection); show($laborCard); updateBannerUI();
+      } else if (mat.type === 'sticker') {
+        show($stickerSection); show($laborCard);
+      } else if (mat.type === 'corrugated') {
+        show($corrSection); show($laborCard);
+      } else if (mat.type === 'prints') {
+        show($printsSection); buildPrintServiceList(); show($laborCard);
+      } else if (mat.type === 'poster') {
+        show($postersSection); buildPosterPills(); show($laborCard);
+      } else if (mat.type === 'canvas') {
+        show($canvasSection); show($step4); show($laborCard);
+        $laborInput.value = '0.75'; $laborInput.disabled = true; $laborInput.style.opacity = '0.5'; $laborInput.style.cursor = 'not-allowed';
+      } else if (mat.type === 'labor') {
+        show($laborSection); show($laborCard);
+      } else if (mat.type === 'designfee') {
+        show($designFeeSection); show($laborCard);
+      } else if (mat.type === 'scanfax') {
+        show($scanFaxSection);
+      } else if (mat.type === 'fixed') {
+        show($step4); show($laborCard); show($tubeFixedDisplay);
+        $tubeFixedText.textContent = `Fixed Cost: ${fmt(mat.fixedRetail)} per unit (material cost: ${fmt(mat.fixedCost)})`;
+      }
+
+      if (typeof lucide !== "undefined") lucide.createIcons();
+    });
+
+    function showMaterialInfo(mat) {
+      let info = '';
+      if (mat.type === 'roll') info = `${mat.width}" wide | Cost: ${fmt(mat.costPerFt)}/ft | Retail: ${fmt(mat.retailPerFt)}/ft`;
+      else if (mat.type === 'banner') info = 'Hemmed banner — select type & length below';
+      else if (mat.type === 'sticker') info = 'Select size and quantity below for tiered pricing';
+      else if (mat.type === 'corrugated') info = 'Rigid sign boards — select size below';
+      else if (mat.type === 'prints') info = 'Select a print service below';
+      else if (mat.type === 'poster') info = 'Select poster size below. Expanded 54" sizes support optional lamination.';
+      else if (mat.type === 'canvas') info = `Cost: ${fmt(mat.costPerSqIn)}/sq in | Retail: ${fmt(mat.retailPerSqIn)}/sq in`;
+      else if (mat.type === 'labor') info = 'Standalone labor — enter description & hours below';
+      else if (mat.type === 'designfee') info = 'Graphic design & artwork — $30.00/hr, enter hours below';
+      else if (mat.type === 'scanfax') info = 'Fax: $1.50 first page + $0.50 each additional · Scan to PDF & Email: $0.50/page';
+      else if (mat.type === 'fixed') info = `Retail: ${fmt(mat.fixedRetail)} each | Cost: ${fmt(mat.fixedCost)} each`;
+      if (info) { $matInfoText.textContent = info; show($matInfo); }
+    }
+
+    function resetFormFields() {
+      hide($step3); hide($step4); hide($lamWrap); hide($laborCard);
+      hide($bannerSection); hide($stickerSection); hide($corrSection);
+      hide($printsSection); hide($postersSection); hide($canvasSection); hide($laborSection);
+      hide($designFeeSection);
+      hide($tubeFixedDisplay); hide($matInfo); hide($addError);
+      hide($scanFaxSection); hide($scanFaxPricePreview);
+      selectedScanFaxType = 'fax';
+      $scanFaxPagesInput.value = '';
+      document.querySelectorAll('.scanfax-type-btn').forEach(b => {
+        if (b.dataset.sftype === 'fax') { b.classList.add('active'); b.classList.remove('text-textMuted'); }
+        else { b.classList.remove('active'); b.classList.add('text-textMuted'); }
+      });
+      $measInput.value = ''; $qtyInput.value = '1'; $laborInput.value = ''; $laborInput.disabled = false; $laborInput.style.opacity = ''; $laborInput.style.cursor = '';
+      $bannerLengthInput.value = '';
+      $laborDescInput.value = ''; $designFeeDescInput.value = '';
+      lamToggleOn = false; bannerLamOn = false; posterLamOn = false;
+      $lamToggle.classList.remove('active'); $lamToggle.setAttribute('aria-checked', 'false');
+      hide($lamSurchargeInfo);
+      $bannerLamToggle.classList.remove('active');
+      $posterLamToggle.classList.remove('active'); $posterLamToggle.setAttribute('aria-checked', 'false');
+      hide($posterLamToggleWrap); hide($posterLamSurchargeInfo);
+      selectedStickerSize = null; selectedStickerQty = null;
+      selectedCorrSize = null; selectedGrommet = 0;
+      selectedPrintService = null; selectedPosterSize = null;
+      document.querySelectorAll('.sticker-pill-btn').forEach(b => { b.classList.remove('active'); b.classList.remove('unavailable'); });
+      document.querySelectorAll('.corr-size-btn').forEach(b => b.classList.remove('active'));
+      hide($stickerPriceDisplay); hide($corrPricePreview);
+      hide($printPagesSection); hide($printPricePreview);
+      hide($posterQtySection); hide($posterPricePreview);
+      hide($canvasLiveInfo);
+      hide($bannerTierBadge); hide($bannerWarning); hide($bannerCostPreview);
+      hide($bannerLamToggleWrap); hide($bannerLamAutoInfo);
+      $measClamp.classList.remove('visible');
+      $bannerClamp.classList.remove('visible');
+    }
+
+    // ── SCAN & FAX TOGGLE ─────────────────────────────────────────
+    document.querySelectorAll('.scanfax-type-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.scanfax-type-btn').forEach(b => { b.classList.remove('active'); b.classList.add('text-textMuted'); });
+        btn.classList.add('active'); btn.classList.remove('text-textMuted');
+        selectedScanFaxType = btn.dataset.sftype;
+        updateScanFaxPreview();
+      });
+    });
+
+    $scanFaxPagesInput.addEventListener('input', updateScanFaxPreview);
+
+    function updateScanFaxPreview() {
+      const pages = parseInt($scanFaxPagesInput.value) || 0;
+      if (pages < 1) { hide($scanFaxPricePreview); return; }
+      show($scanFaxPricePreview);
+      let total = 0;
+      let rateText = '';
+      if (selectedScanFaxType === 'fax') {
+        total = 1.50 + Math.max(0, pages - 1) * 0.50;
+        rateText = `${pages} page${pages > 1 ? 's' : ''} — $1.50 first page` + (pages > 1 ? ` + ${pages - 1} × $0.50` : '');
+      } else {
+        total = pages * 0.50;
+        rateText = `${pages} page${pages > 1 ? 's' : ''} × $0.50/page`;
+      }
+      $scanFaxPriceText.textContent = fmt(total);
+      $scanFaxRateText.textContent = rateText;
+    }
+
+    // ── UNIT TOGGLE ───────────────────────────────────────────────
+    document.querySelectorAll('.unit-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.unit-btn').forEach(b => { b.classList.remove('active'); b.classList.add('text-textMuted'); });
+        btn.classList.add('active'); btn.classList.remove('text-textMuted');
+        selectedUnit = btn.dataset.unit;
+        $unitLabel.textContent = selectedUnit;
+        $measInput.placeholder = selectedUnit === 'ft' ? 'Enter feet...' : 'Enter inches...';
+        $measInput.max = selectedUnit === 'ft' ? 40 : 480;
+      });
+    });
+
+    $measInput.addEventListener('input', () => {
+      const maxFt = 40;
+      const max = selectedUnit === 'ft' ? maxFt : maxFt * 12;
+      if (parseFloat($measInput.value) > max) {
+        $measInput.value = max;
+        $measClamp.classList.add('visible');
+      } else {
+        $measClamp.classList.remove('visible');
+      }
+    });
+
+    // ── LAMINATION TOGGLE ─────────────────────────────────────────
+    $lamToggle.addEventListener('click', () => {
+      lamToggleOn = !lamToggleOn;
+      $lamToggle.classList.toggle('active', lamToggleOn);
+      $lamToggle.setAttribute('aria-checked', lamToggleOn);
+      if (lamToggleOn) {
+        $lamSurchargeText.textContent = 'Lamination adds ~$4.00/ft to material cost';
+        show($lamSurchargeInfo);
+      } else {
+        hide($lamSurchargeInfo);
+      }
+    });
+
+    // ── BANNER UI ─────────────────────────────────────────────────
+    document.querySelectorAll('.banner-type-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.banner-type-btn').forEach(b => { b.classList.remove('active'); b.classList.add('text-textMuted'); });
+        btn.classList.add('active'); btn.classList.remove('text-textMuted');
+        selectedBannerType = btn.dataset.bannerType;
+        updateBannerUI();
+      });
+    });
+
+    function updateBannerUI() {
+      const isLam = selectedBannerType === '54" Laminated';
+      if (isLam) {
+        hide($bannerLamToggleWrap);
+        $bannerLamAutoText.textContent = '✓ Lamination included in this banner type';
+        show($bannerLamAutoInfo);
+      } else {
+        hide($bannerLamAutoInfo);
+      }
+      updateBannerPreview();
+    }
+
+    $bannerLengthInput.addEventListener('input', () => {
+      if (parseFloat($bannerLengthInput.value) > 40) {
+        $bannerLengthInput.value = 40;
+        $bannerClamp.classList.add('visible');
+      } else {
+        $bannerClamp.classList.remove('visible');
+      }
+      updateBannerPreview();
+    });
+
+    function updateBannerPreview() {
+      const len = parseFloat($bannerLengthInput.value);
+      if (!len || len < 3) {
+        hide($bannerTierBadge); hide($bannerCostPreview);
+        if (len && len < 3) show($bannerWarning); else hide($bannerWarning);
+        return;
+      }
+      hide($bannerWarning);
+      const tiers = BANNER_TIERS[selectedBannerType];
+      const tier = tiers.find(t => len >= t.minFt && len <= t.maxFt);
+      if (!tier) { hide($bannerTierBadge); hide($bannerCostPreview); return; }
+      $bannerTierBadgeText.textContent = `${fmt(tier.retail)}/ft tier (${tier.minFt}–${tier.maxFt} ft)`;
+      show($bannerTierBadge);
+      const total = tier.retail * len;
+      const costTotal = tier.cost * len;
+      $bannerCostPreviewText.textContent = `${len} ft × ${fmt(tier.retail)}/ft = ${fmt(total)} retail | Cost: ${fmt(costTotal)}`;
+      show($bannerCostPreview);
+    }
+
+    // ── STICKER UI ────────────────────────────────────────────────
+    document.getElementById('sticker-size-pills').addEventListener('click', (e) => {
+      const btn = e.target.closest('.sticker-pill-btn');
+      if (!btn) return;
+      document.querySelectorAll('#sticker-size-pills .sticker-pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedStickerSize = btn.dataset.stickerSize;
+      updateStickerQtyAvailability();
+      updateStickerPrice();
+    });
+
+    document.getElementById('sticker-qty-pills').addEventListener('click', (e) => {
+      const btn = e.target.closest('.sticker-pill-btn');
+      if (!btn || btn.classList.contains('unavailable')) return;
+      document.querySelectorAll('#sticker-qty-pills .sticker-pill-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedStickerQty = parseInt(btn.dataset.stickerQty);
+      updateStickerPrice();
+    });
+
+    function updateStickerQtyAvailability() {
+      if (!selectedStickerSize) return;
+      const priceData = STICKER_PRICING[selectedStickerSize];
+      document.querySelectorAll('#sticker-qty-pills .sticker-pill-btn').forEach(btn => {
+        const qty = parseInt(btn.dataset.stickerQty);
+        if (priceData[qty] === null) {
+          btn.classList.add('unavailable');
+          btn.classList.remove('active');
+          if (selectedStickerQty === qty) selectedStickerQty = null;
+        } else {
+          btn.classList.remove('unavailable');
+        }
+      });
+    }
+
+    function updateStickerPrice() {
+      if (!selectedStickerSize || !selectedStickerQty) { hide($stickerPriceDisplay); return; }
+      show($stickerPriceDisplay);
+      const priceData = STICKER_PRICING[selectedStickerSize];
+      const price = priceData[selectedStickerQty];
+      if (price === null || price === undefined) {
+        hide($stickerPriceBox); show($stickerNoPriceWarning);
+      } else {
+        show($stickerPriceBox); hide($stickerNoPriceWarning);
+        $stickerPriceValue.textContent = fmt(price);
+        const each = price / selectedStickerQty;
+        $stickerPriceSubtitle.textContent = `${selectedStickerQty} × ${selectedStickerSize} stickers (${fmt(each)} each)`;
+      }
+    }
+
+    // ── CORRUGATED UI ─────────────────────────────────────────────
+    document.getElementById('corr-size-pills').addEventListener('click', (e) => {
+      const btn = e.target.closest('.corr-size-btn');
+      if (!btn || !btn.dataset.corrSize) return;
+      document.querySelectorAll('#corr-size-pills .corr-size-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      selectedCorrSize = btn.dataset.corrSize;
+      updateCorrPreview();
+    });
+
+    document.getElementById('corr-grommet-2-btn').addEventListener('click', () => {
+      selectedGrommet = selectedGrommet === 2 ? 0 : 2;
+      document.getElementById('corr-grommet-2-btn').classList.toggle('active', selectedGrommet === 2);
+      document.getElementById('corr-grommet-4-btn').classList.remove('active');
+      updateCorrPreview();
+    });
+    document.getElementById('corr-grommet-4-btn').addEventListener('click', () => {
+      selectedGrommet = selectedGrommet === 4 ? 0 : 4;
+      document.getElementById('corr-grommet-4-btn').classList.toggle('active', selectedGrommet === 4);
+      document.getElementById('corr-grommet-2-btn').classList.remove('active');
+      updateCorrPreview();
+    });
+
+    $corrQtyInput.addEventListener('input', updateCorrPreview);
+
+    function updateCorrPreview() {
+      if (!selectedCorrSize) { hide($corrPricePreview); return; }
+      show($corrPricePreview);
+      const p = CORR_PRICING[selectedCorrSize];
+      const qty = Math.max(1, parseInt($corrQtyInput.value) || 1);
+      const grommetCost = selectedGrommet === 2 ? 2 : selectedGrommet === 4 ? 4 : 0;
+      const perSheet = p.retail + grommetCost;
+      $corrPerSheet.textContent = fmt(p.retail);
+      if (grommetCost > 0) {
+        $corrGrommetLine.style.display = 'flex';
+        $corrGrommetLabel.textContent = `${selectedGrommet} Grommets`;
+        $corrGrommetValue.textContent = '+' + fmt(grommetCost);
+      } else {
+        $corrGrommetLine.style.display = 'none';
+      }
+      $corrSubtotalLabel.textContent = `Subtotal (${qty} sheet${qty > 1 ? 's' : ''})`;
+      $corrSubtotalPrice.textContent = fmt(perSheet * qty);
+    }
+
+    // ── PRINTS UI ─────────────────────────────────────────────────
+    function buildPrintServiceList() {
+      $printServiceList.innerHTML = '';
+      PRINT_SERVICES.forEach(svc => {
+        const row = document.createElement('div');
+        row.className = 'print-service-row';
+        row.dataset.serviceId = svc.id;
+        row.innerHTML = `<span class="service-name">${svc.name}</span><span class="service-price">${fmt(svc.perPage)}/pg</span>`;
+        $printServiceList.appendChild(row);
+        row.addEventListener('click', () => {
+          document.querySelectorAll('.print-service-row').forEach(r => r.classList.remove('active'));
+          row.classList.add('active');
+          selectedPrintService = svc;
+          show($printPagesSection);
+          updatePrintPreview();
+        });
+      });
+    }
+
+    $printPagesInput.addEventListener('input', updatePrintPreview);
+
+    function updatePrintPreview() {
+      if (!selectedPrintService) return;
+      show($printPricePreview);
+      const pages = Math.max(1, parseInt($printPagesInput.value) || 1);
+      const total = selectedPrintService.perPage * pages;
+      $printPreviewService.textContent = selectedPrintService.name;
+      $printPreviewPerPage.textContent = fmt(selectedPrintService.perPage);
+      $printPreviewPages.textContent = pages;
+      $printPreviewTotal.textContent = fmt(total);
+    }
+
+    // ── POSTERS UI ────────────────────────────────────────────────
+    function buildPosterPills() {
+      $posterSizePills.innerHTML = '';
+      POSTER_SIZES.forEach(ps => {
+        const btn = document.createElement('button');
+        btn.className = 'poster-size-btn py-2.5 px-4 rounded-lg text-xs font-bold border border-border text-textMuted cursor-pointer text-center';
+        btn.textContent = ps.label;
+        btn.dataset.posterId = ps.id;
+        $posterSizePills.appendChild(btn);
+        btn.addEventListener('click', () => {
+          $posterSizePills.querySelectorAll('.poster-size-btn').forEach(b => { b.classList.remove('active'); b.classList.add('text-textMuted'); });
+          btn.classList.add('active'); btn.classList.remove('text-textMuted');
+          selectedPosterSize = ps;
+          if (ps.expanded) {
+            show($posterLamToggleWrap);
+            const sqft = POSTER_SQFT[ps.id];
+            const lamSurcharge = POSTER_LAM_PER_SQFT * sqft;
+            document.getElementById('poster-lam-toggle-label').textContent = `Add Lamination (+${fmt(lamSurcharge)})`;
+          } else {
+            posterLamOn = false;
+            $posterLamToggle.classList.remove('active');
+            $posterLamToggle.setAttribute('aria-checked', 'false');
+            hide($posterLamToggleWrap);
+            hide($posterLamSurchargeInfo);
+          }
+          show($posterQtySection);
+          updatePosterPreview();
+        });
+      });
+    }
+
+    $posterLamToggle.addEventListener('click', () => {
+      posterLamOn = !posterLamOn;
+      $posterLamToggle.classList.toggle('active', posterLamOn);
+      $posterLamToggle.setAttribute('aria-checked', posterLamOn);
+      if (posterLamOn && selectedPosterSize && selectedPosterSize.expanded) {
+        const sqft = POSTER_SQFT[selectedPosterSize.id];
+        const lamSurcharge = POSTER_LAM_PER_SQFT * sqft;
+        $posterLamSurchargeText.textContent = `Lamination adds ${fmt(lamSurcharge)} per poster (${sqft.toFixed(1)} sq ft × ${fmt(POSTER_LAM_PER_SQFT)}/sq ft)`;
+        show($posterLamSurchargeInfo);
+      } else {
+        hide($posterLamSurchargeInfo);
+      }
+      updatePosterPreview();
+    });
+
+    $posterQtyInput.addEventListener('input', updatePosterPreview);
+
+    function updatePosterPreview() {
+      if (!selectedPosterSize) return;
+      show($posterPricePreview);
+      const qty = Math.max(1, parseInt($posterQtyInput.value) || 1);
+      let perPoster = selectedPosterSize.retail;
+      let lamPerPoster = 0;
+      if (posterLamOn && selectedPosterSize.expanded && POSTER_SQFT[selectedPosterSize.id]) {
+        lamPerPoster = POSTER_LAM_PER_SQFT * POSTER_SQFT[selectedPosterSize.id];
+      }
+      $posterPreviewSize.textContent = selectedPosterSize.label;
+      $posterPreviewEach.textContent = fmt(perPoster);
+      if (lamPerPoster > 0) {
+        $posterLamLine.style.display = 'flex';
+        $posterPreviewLam.textContent = '+' + fmt(lamPerPoster);
+      } else {
+        $posterLamLine.style.display = 'none';
+      }
+      $posterPreviewQty.textContent = qty;
+      $posterPreviewTotal.textContent = fmt((perPoster + lamPerPoster) * qty);
+    }
+
+    // ── CANVAS UI ─────────────────────────────────────────────────
+    $canvasH.addEventListener('input', updateCanvasPreview);
+    $canvasW.addEventListener('input', updateCanvasPreview);
+
+    function updateCanvasPreview() {
+      const h = parseFloat($canvasH.value);
+      const w = parseFloat($canvasW.value);
+      if (!h || !w || h <= 0 || w <= 0) { hide($canvasLiveInfo); return; }
+      const mat = getMaterial('canvas-print');
+      const sqIn = h * w;
+      const cost = sqIn * mat.costPerSqIn;
+      const retail = sqIn * mat.retailPerSqIn;
+      $canvasLiveInfoText.textContent = `${h}" × ${w}" = ${sqIn.toFixed(1)} sq in | Cost: ${fmt(cost)} | Retail: ${fmt(retail)}`;
+      show($canvasLiveInfo);
+    }
+
+    // ── ADD TO JOB ────────────────────────────────────────────────
+    $addBtn.addEventListener('click', () => {
+      hide($addError);
+      const mat = getMaterial($matSelect.value);
+      if (!mat) { showError('Please select a material'); return; }
+
+      let laborHrs = parseFloat($laborInput.value) || 0;
+      let laborCost = laborHrs * LABOR_RATE;
+      let item = null;
+
+      if (mat.type === 'roll') {
+        let measFt = parseFloat($measInput.value);
+        if (!measFt || measFt <= 0) { showError('Enter a valid measurement'); return; }
+        if (selectedUnit === 'in') measFt = measFt / 12;
+        const pcs = Math.max(1, parseInt($qtyInput.value) || 1);
+        let costPerFt = mat.costPerFt;
+        let retailPerFt = mat.retailPerFt;
+        if (lamToggleOn && !mat.isLaminate) { costPerFt += 1.20; retailPerFt += 4.00; }
+        const matCost = costPerFt * measFt * pcs;
+        const lineTotal = retailPerFt * measFt * pcs;
+        item = {
+          id: Date.now(), name: mat.name, category: mat.category, type: 'roll',
+          measFt, pcs, matCost, lineTotal, laborHrs, laborCost, laminated: lamToggleOn && !mat.isLaminate,
+          detail: `${measFt.toFixed(2)} ft × ${pcs} pc${pcs > 1 ? 's' : ''}${lamToggleOn && !mat.isLaminate ? ' + Lam' : ''}`,
+        };
+      } else if (mat.type === 'banner') {
+        const len = parseFloat($bannerLengthInput.value);
+        if (!len || len < 3) { showError('Banner must be at least 3 ft'); return; }
+        const tiers = BANNER_TIERS[selectedBannerType];
+        const tier = tiers.find(t => len >= t.minFt && len <= t.maxFt);
+        if (!tier) { showError('No tier found for this length'); return; }
+        const matCost = tier.cost * len;
+        const lineTotal = tier.retail * len;
+        item = {
+          id: Date.now(), name: `Banner — ${selectedBannerType}`, category: 'Banner', type: 'banner',
+          matCost, lineTotal, laborHrs, laborCost,
+          detail: `${len} ft @ ${fmt(tier.retail)}/ft`,
+        };
+      } else if (mat.type === 'sticker') {
+        if (!selectedStickerSize || !selectedStickerQty) { showError('Select sticker size and quantity'); return; }
+        const priceData = STICKER_PRICING[selectedStickerSize];
+        const price = priceData[selectedStickerQty];
+        if (!price) { showError('No pricing for this combination'); return; }
+        const costEach = priceData.cost;
+        const matCost = costEach * selectedStickerQty;
+        item = {
+          id: Date.now(), name: `Stickers — ${selectedStickerSize}`, category: 'Stickers', type: 'sticker',
+          matCost, lineTotal: price, laborHrs, laborCost,
+          detail: `${selectedStickerQty} × ${selectedStickerSize}`,
+        };
+      } else if (mat.type === 'corrugated') {
+        if (!selectedCorrSize) { showError('Select a sheet size'); return; }
+        const p = CORR_PRICING[selectedCorrSize];
+        const qty = Math.max(1, parseInt($corrQtyInput.value) || 1);
+        const grommetCost = selectedGrommet === 2 ? 2 : selectedGrommet === 4 ? 4 : 0;
+        const perSheetRetail = p.retail + grommetCost;
+        const perSheetCost = p.cost + (grommetCost * 0.5);
+        item = {
+          id: Date.now(), name: `Corrugated — ${p.label}`, category: 'Corrugated', type: 'corrugated',
+          matCost: perSheetCost * qty, lineTotal: perSheetRetail * qty, laborHrs, laborCost,
+          detail: `${qty} × ${p.label}${selectedGrommet ? ` + ${selectedGrommet} grommets` : ''}`,
+        };
+      } else if (mat.type === 'prints') {
+        if (!selectedPrintService) { showError('Select a print service'); return; }
+        const pages = Math.max(1, parseInt($printPagesInput.value) || 1);
+        const lineTotal = selectedPrintService.perPage * pages;
+        const matCost = selectedPrintService.cost * pages;
+        item = {
+          id: Date.now(), name: selectedPrintService.name, category: 'Prints & Copies', type: 'prints',
+          matCost, lineTotal, laborHrs, laborCost,
+          detail: `${pages} page${pages > 1 ? 's' : ''} @ ${fmt(selectedPrintService.perPage)}/pg`,
+        };
+      } else if (mat.type === 'poster') {
+        if (!selectedPosterSize) { showError('Select a poster size'); return; }
+        const qty = Math.max(1, parseInt($posterQtyInput.value) || 1);
+        let lamPerPoster = 0;
+        let lamCostPerPoster = 0;
+        if (posterLamOn && selectedPosterSize.expanded && POSTER_SQFT[selectedPosterSize.id]) {
+          lamPerPoster = POSTER_LAM_PER_SQFT * POSTER_SQFT[selectedPosterSize.id];
+          lamCostPerPoster = POSTER_LAM_COST_PER_SQFT * POSTER_SQFT[selectedPosterSize.id];
+        }
+        const perPosterRetail = selectedPosterSize.retail + lamPerPoster;
+        const perPosterCost = selectedPosterSize.cost + lamCostPerPoster;
+        const lamLabel = posterLamOn && selectedPosterSize.expanded ? ' + Lam' : '';
+        item = {
+          id: Date.now(), name: `Poster — ${selectedPosterSize.label}`, category: 'Posters', type: 'poster',
+          matCost: perPosterCost * qty, lineTotal: perPosterRetail * qty, laborHrs, laborCost,
+          detail: `${qty} × ${selectedPosterSize.label}${lamLabel}`,
+        };
+      } else if (mat.type === 'canvas') {
+        const h = parseFloat($canvasH.value);
+        const w = parseFloat($canvasW.value);
+        if (!h || !w) { showError('Enter canvas dimensions'); return; }
+        laborHrs = 0.75; laborCost = laborHrs * LABOR_RATE;
+        const pcs = Math.max(1, parseInt($qtyInput.value) || 1);
+        const sqIn = h * w;
+        const matCost = sqIn * mat.costPerSqIn * pcs;
+        const lineTotal = sqIn * mat.retailPerSqIn * pcs;
+        item = {
+          id: Date.now(), name: 'Canvas Print', category: 'Canvas', type: 'canvas',
+          matCost, lineTotal, laborHrs, laborCost,
+          detail: `${h}" × ${w}" × ${pcs} pc${pcs > 1 ? 's' : ''}`,
+        };
+      } else if (mat.type === 'labor') {
+        if (laborHrs <= 0) { showError('Enter labor hours'); return; }
+        const desc = $laborDescInput.value.trim() || 'General';
+        item = {
+          id: Date.now(), name: `Labor — ${desc}`, category: 'Labor', type: 'labor',
+          matCost: 0, lineTotal: laborCost, laborHrs, laborCost,
+          detail: `${laborHrs}h @ ${fmt(LABOR_RATE)}/hr`,
+        };
+      } else if (mat.type === 'designfee') {
+        if (laborHrs <= 0) { showError('Enter design hours'); return; }
+        const dfDesc = $designFeeDescInput.value.trim() || 'Design Work';
+        const dfCost = laborHrs * DESIGN_FEE_RATE;
+        item = {
+          id: Date.now(), name: `Design Fee — ${dfDesc}`, category: 'Design Fee', type: 'designfee',
+          matCost: 0, lineTotal: dfCost, laborHrs: 0, laborCost: 0,
+          detail: `${laborHrs}h @ ${fmt(DESIGN_FEE_RATE)}/hr`,
+        };
+      } else if (mat.type === 'scanfax') {
+        const pages = parseInt($scanFaxPagesInput.value) || 0;
+        if (pages < 1) { showError('Enter number of pages'); return; }
+        let lineTotal = 0;
+        let itemName = '';
+        let detailStr = '';
+        if (selectedScanFaxType === 'fax') {
+          lineTotal = 1.50 + Math.max(0, pages - 1) * 0.50;
+          itemName = 'Fax';
+          detailStr = `${pages} page${pages > 1 ? 's' : ''} — $1.50 first` + (pages > 1 ? ` + ${pages - 1} × $0.50` : '');
+        } else {
+          lineTotal = pages * 0.50;
+          itemName = 'Scan to PDF & Email';
+          detailStr = `${pages} page${pages > 1 ? 's' : ''} @ $0.50/pg`;
+        }
+        item = {
+          id: Date.now(), name: itemName, category: 'Scan & Fax', type: 'scanfax',
+          matCost: 0, lineTotal, laborHrs: 0, laborCost: 0,
+          detail: detailStr,
+        };
+      } else if (mat.type === 'fixed') {
+        const pcs = Math.max(1, parseInt($qtyInput.value) || 1);
+        item = {
+          id: Date.now(), name: mat.name, category: mat.category, type: 'fixed',
+          matCost: mat.fixedCost * pcs, lineTotal: mat.fixedRetail * pcs, laborHrs, laborCost,
+          detail: `${pcs} × ${fmt(mat.fixedRetail)}`,
+        };
+      }
+
+      if (item) {
+        jobItems.push(item);
+        renderJobList();
+        renderSummary();
+        resetFormFields();
+        $matSelect.value = '';
+        hide($matInfo);
+      }
+    });
+
+    function showError(msg) {
+      $addErrorText.textContent = msg;
+      show($addError);
+    }
+
+    // ── JOB LIST (LEFT) ───────────────────────────────────────────
+    function renderJobList() {
+      $jobList.innerHTML = '';
+      if (jobItems.length === 0) {
+        $jobList.appendChild($jobEmpty);
+        show($jobEmpty);
+        hide($jobCountBadge);
+        return;
+      }
+      hide($jobEmpty);
+      show($jobCountBadge);
+      $jobCountBadge.textContent = jobItems.length;
+
+      jobItems.forEach((item, idx) => {
+        const safeLineTotal = item.lineTotal || 0;
+        const safeLaborCost = item.laborCost || 0;
+        const safeLaborHrs = item.laborHrs || 0;
+        const card = document.createElement('div');
+        card.className = 'job-item-card bg-base/60 border border-border rounded-lg px-3 py-2.5 flex items-center justify-between gap-2 slide-in';
+        card.innerHTML = `
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-semibold text-textPrimary truncate">${item.name}</p>
+            <p class="text-[10px] text-textDim truncate">${item.detail}${item.type !== 'labor' && item.type !== 'scanfax' && item.type !== 'designfee' && safeLaborHrs ? ' | ' + safeLaborHrs + 'h labor' : ''}</p>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <span class="text-xs font-bold text-accent tabular-nums">${fmt(item.type === 'labor' || item.type === 'scanfax' || item.type === 'designfee' ? safeLineTotal : safeLineTotal + safeLaborCost)}</span>
+            <button class="delete-btn w-6 h-6 rounded-full flex items-center justify-center text-textDim hover:text-danger cursor-pointer" data-idx="${idx}" title="Remove">
+              <i data-lucide="x" class="w-3.5 h-3.5"></i>
+            </button>
+          </div>
+        `;
+        $jobList.appendChild(card);
+      });
+
+      $jobList.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.idx);
+          jobItems.splice(idx, 1);
+          renderJobList();
+          renderSummary();
+        });
+      });
+
+      if (typeof lucide !== "undefined") lucide.createIcons();
+    }
+
+    // ── SUMMARY (RIGHT) — FIXED: defensive numerics + pre-computed profit ──
+    function renderSummary() {
+      if (jobItems.length === 0) {
+        show($emptyState); hide($resultsContainer); hide($clearAllBtn);
+        $printQuoteBtn.disabled = true;
+        return;
+      }
+      hide($emptyState); show($resultsContainer); show($clearAllBtn);
+      $printQuoteBtn.disabled = false;
+
+      // Table
+      $summaryBody.innerHTML = '';
+      let totalRetail = 0, totalCost = 0, totalLabor = 0;
+
+      jobItems.forEach((item, idx) => {
+        const itemLineTotal = Number(item.lineTotal) || 0;
+        const itemMatCost = Number(item.matCost) || 0;
+        const itemLaborCost = Number(item.laborCost) || 0;
+        const itemLaborHrs = Number(item.laborHrs) || 0;
+
+        if (item.type === 'labor') {
+          totalRetail += 0;
+          totalCost += 0;
+          totalLabor += itemLaborCost;
+        } else if (item.type === 'designfee') {
+          totalRetail += itemLineTotal;
+          totalCost += 0;
+          totalLabor += 0;
+        } else {
+          totalRetail += itemLineTotal;
+          totalCost += itemMatCost;
+          totalLabor += itemLaborCost;
+        }
+
+        const rowProfit = itemLineTotal - itemMatCost - (item.type === 'labor' ? 0 : itemLaborCost);
+        const rowPct = itemLineTotal > 0 ? (rowProfit / itemLineTotal * 100).toFixed(1) + '%' : '—';
+        const rowColor = rowProfit >= 0 ? 'text-green-400' : 'text-red-400';
+
+        const tr = document.createElement('tr');
+        tr.className = idx % 2 === 0 ? 'bg-rowEven' : 'bg-rowOdd';
+        tr.innerHTML = `
+          <td class="px-4 py-2.5"><button class="summary-remove-btn" data-idx="${idx}" title="Remove">×</button></td>
+          <td class="px-4 py-2.5 text-xs font-medium text-textPrimary">${item.name || 'Unknown'}</td>
+          <td class="px-4 py-2.5 text-xs text-textMuted text-right">${item.detail || ''}</td>
+          <td class="px-4 py-2.5 text-xs text-textDim text-right tabular-nums">${fmt(itemMatCost)}</td>
+          <td class="px-4 py-2.5 text-xs font-bold text-textPrimary text-right tabular-nums">${fmt(itemLineTotal)}</td>
+          <td class="px-4 py-2.5 text-xs font-semibold text-right tabular-nums ${rowColor}">${fmt(rowProfit)}</td>
+          <td class="px-4 py-2.5 text-xs font-semibold text-right tabular-nums ${rowColor}">${rowPct}</td>
+        `;
+        $summaryBody.appendChild(tr);
+
+        if (item.type !== 'labor' && item.type !== 'scanfax' && item.type !== 'designfee' && itemLaborHrs > 0) {
+          const ltr = document.createElement('tr');
+          ltr.className = idx % 2 === 0 ? 'bg-rowEven' : 'bg-rowOdd';
+          ltr.innerHTML = `
+            <td class="px-4 py-1"></td>
+            <td class="px-4 py-1 text-[10px] text-textDim" colspan="2">└ Labor: ${itemLaborHrs}h × ${fmt(LABOR_RATE)}/hr</td>
+            <td class="px-4 py-1"></td>
+            <td class="px-4 py-1 text-[10px] text-accent text-right tabular-nums">${fmt(itemLaborCost)}</td>
+            <td class="px-4 py-1"></td>
+            <td class="px-4 py-1"></td>
+          `;
+          $summaryBody.appendChild(ltr);
+        }
+      });
+
+      $summaryBody.querySelectorAll('.summary-remove-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.idx);
+          jobItems.splice(idx, 1);
+          renderJobList();
+          renderSummary();
+        });
+      });
+
+      const subtotal = totalRetail + totalLabor;
+      const safeDiscountPct = Number(discountPct) || 0;
+      const safeDiscountAmt = Number(discountAmt) || 0;
+      const discountAmount = discountType === 'pct' ? subtotal * (safeDiscountPct / 100) : Math.min(safeDiscountAmt, subtotal);
+      const afterDiscount = subtotal - discountAmount;
+      const miscAmount = miscSurcharge ? afterDiscount * 0.50 : 0;
+      const taxAmount = taxExempt ? 0 : (afterDiscount + miscAmount) * TAX_RATE;
+      const grandTotal = afterDiscount + miscAmount + taxAmount;
+      const profit = grandTotal - totalCost;
+      const profitColor = profit >= 0 ? '#4ade80' : '#f87171';
+
+      let html = `
+        <div class="flex justify-between items-baseline"><span class="text-textMuted">Materials</span><span class="font-semibold tabular-nums">${fmt(totalRetail)}</span></div>
+        <div class="flex justify-between items-baseline"><span class="text-textMuted">Labor</span><span class="font-semibold tabular-nums">${fmt(totalLabor)}</span></div>
+      `;
+      if (safeDiscountPct > 0 || safeDiscountAmt > 0) {
+        const discLabel = discountType === 'pct' ? `Discount (${safeDiscountPct}%)` : `Discount (−${fmt(safeDiscountAmt)})`;
+        html += `<div class="flex justify-between items-baseline"><span class="text-green-400">${discLabel}</span><span class="font-semibold text-green-400 tabular-nums">−${fmt(discountAmount)}</span></div>`;
+      }
+      if (miscSurcharge) {
+        html += `<div class="flex justify-between items-baseline"><span style="color:#ef4444;font-weight:600;">MISC (50%)</span><span style="color:#ef4444;font-weight:600;" class="tabular-nums">${fmt(miscAmount)}</span></div>`;
+      }
+      html += taxExempt
+        ? `<div class="flex justify-between items-baseline"><span style="color:#3b82f6;font-weight:600;">Tax Exempt</span><span style="color:#3b82f6;font-weight:600;" class="tabular-nums">$0.00</span></div>`
+        : `<div class="flex justify-between items-baseline"><span class="text-textMuted">Tax (7%)</span><span class="font-semibold tabular-nums">${fmt(taxAmount)}</span></div>`;
+      html += `
+        <div class="border-t border-border pt-3 flex justify-between items-baseline">
+          <span class="text-textPrimary font-bold text-base">Grand Total</span>
+          <span class="text-2xl font-extrabold text-accent tabular-nums">${fmt(grandTotal)}</span>
+        </div>
+        <div class="flex justify-between items-baseline"><span class="text-textDim text-xs">Total Material Cost</span><span class="text-xs text-textDim tabular-nums">${fmt(totalCost)}</span></div>
+        <div class="flex justify-between items-baseline"><span class="text-textDim text-xs">Profit (excl. labor cost)</span><span class="text-xs font-semibold tabular-nums" style="color: ${profitColor}">${fmt(profit)}</span></div>
+      `;
+      $grandTotalInner.innerHTML = html;
+    }
+
+    // ── CLEAR ALL ─────────────────────────────────────────────────
+    $clearAllBtn.addEventListener('click', () => {
+      if (confirm('Clear all job items?')) {
+        jobItems = [];
+        renderJobList();
+        renderSummary();
+      }
+    });
+
+    // ── CUSTOMER INFO MODAL ───────────────────────────────────────
+    const $ciBackdrop = document.getElementById('ci-modal-backdrop');
+    const $ciName = document.getElementById('ci-name-input');
+    const $ciPhone = document.getElementById('ci-phone-input');
+    const $ciEmail = document.getElementById('ci-email-input');
+    const $ciBadge = document.getElementById('customer-info-badge');
+
+    document.getElementById('customer-info-btn').addEventListener('click', () => {
+      $ciName.value = customerInfo.name;
+      $ciPhone.value = customerInfo.phone;
+      $ciEmail.value = customerInfo.email;
+      $ciBackdrop.classList.add('open');
+    });
+    document.getElementById('ci-modal-close-btn').addEventListener('click', () => $ciBackdrop.classList.remove('open'));
+    document.getElementById('ci-modal-save-btn').addEventListener('click', () => {
+      customerInfo.name = $ciName.value.trim();
+      customerInfo.phone = $ciPhone.value.trim();
+      customerInfo.email = $ciEmail.value.trim();
+      const hasInfo = customerInfo.name || customerInfo.phone || customerInfo.email;
+      $ciBadge.classList.toggle('visible', hasInfo);
+      $ciBackdrop.classList.remove('open');
+    });
+    document.getElementById('ci-modal-clear-btn').addEventListener('click', () => {
+      $ciName.value = ''; $ciPhone.value = ''; $ciEmail.value = '';
+      customerInfo = { name: '', phone: '', email: '' };
+      $ciBadge.classList.remove('visible');
+      $ciBackdrop.classList.remove('open');
+    });
+
+    // ── DISCOUNT MODAL ────────────────────────────────────────────
+    const $discBackdrop = document.getElementById('disc-modal-backdrop');
+    const $discInput = document.getElementById('disc-pct-input');
+    const $discPreview = document.getElementById('disc-preview-line');
+    const $discBadge = document.getElementById('discount-active-badge');
+
+    function setDiscType(type) {
+      discountType = type;
+      const sign = document.getElementById('disc-type-sign');
+      const btnPct = document.getElementById('disc-type-pct');
+      const btnAmt = document.getElementById('disc-type-amt');
+      if (type === 'pct') {
+        sign.textContent = '%'; $discInput.max = 100;
+        btnPct.style.background = '#22c55e'; btnPct.style.color = '#fff';
+        btnAmt.style.background = 'transparent'; btnAmt.style.color = '#22c55e';
+      } else {
+        sign.textContent = '$'; $discInput.removeAttribute('max');
+        btnAmt.style.background = '#22c55e'; btnAmt.style.color = '#fff';
+        btnPct.style.background = 'transparent'; btnPct.style.color = '#22c55e';
+      }
+      $discInput.value = '';
+      updateDiscPreview();
+    }
+
+    document.getElementById('disc-type-pct').addEventListener('click', () => setDiscType('pct'));
+    document.getElementById('disc-type-amt').addEventListener('click', () => setDiscType('amt'));
+
+    document.getElementById('discount-btn').addEventListener('click', () => {
+      $discInput.value = discountType === 'pct' ? (discountPct || '') : (discountAmt || '');
+      setDiscType(discountType);
+      updateDiscPreview();
+      $discBackdrop.classList.add('open');
+    });
+    document.getElementById('disc-modal-close-btn').addEventListener('click', () => $discBackdrop.classList.remove('open'));
+    $discInput.addEventListener('input', updateDiscPreview);
+
+    function getSubtotal() {
+      return jobItems.reduce((s, i) => s + (Number(i.lineTotal) || 0) + (Number(i.laborCost) || 0), 0);
+    }
+
+    function updateDiscPreview() {
+      const val = parseFloat($discInput.value) || 0;
+      if (val > 0 && jobItems.length > 0) {
+        const subtotal = getSubtotal();
+        const savings = discountType === 'pct' ? subtotal * (Math.min(val,100) / 100) : Math.min(val, subtotal);
+        $discPreview.innerHTML = `Saves customer <span class="disc-preview-amount">${fmt(savings)}</span>`;
+      } else { $discPreview.textContent = ''; }
+    }
+
+    document.getElementById('disc-modal-apply-btn').addEventListener('click', () => {
+      const val = parseFloat($discInput.value) || 0;
+      if (discountType === 'pct') { discountPct = Math.min(100, Math.max(0, val)); discountAmt = 0; }
+      else { discountAmt = Math.max(0, val); discountPct = 0; }
+      $discBadge.classList.toggle('visible', discountPct > 0 || discountAmt > 0);
+      $discBackdrop.classList.remove('open');
+      renderSummary();
+    });
+    document.getElementById('disc-modal-remove-btn').addEventListener('click', () => {
+      discountPct = 0; discountAmt = 0;
+      $discBadge.classList.remove('visible');
+      $discBackdrop.classList.remove('open');
+      renderSummary();
+    });
+
+    // ── TAX EXEMPT TOGGLE ─────────────────────────────────────────
+    const $taxExemptBtn = document.getElementById('tax-exempt-btn');
+    const $taxExemptBadge = document.getElementById('tax-exempt-badge');
+    $taxExemptBtn.addEventListener('click', () => {
+      taxExempt = !taxExempt;
+      $taxExemptBtn.classList.toggle('active', taxExempt);
+      $taxExemptBadge.classList.toggle('visible', taxExempt);
+      renderSummary();
+    });
+
+    // ── MISC SURCHARGE TOGGLE ────────────────────────────────────
+    const $miscBtn = document.getElementById('misc-btn');
+    const $miscBadge = document.getElementById('misc-badge');
+    $miscBtn.addEventListener('click', () => {
+      miscSurcharge = !miscSurcharge;
+      $miscBtn.classList.toggle('active', miscSurcharge);
+      $miscBadge.classList.toggle('visible', miscSurcharge);
+      renderSummary();
+    });
+
+    // ── PRINT QUOTE (window.print() — no popup) ──────────────────
+    window.addEventListener('beforeprint', () => {
+      document.documentElement.style.cssText += ';height:auto!important;overflow:visible!important;';
+      document.body.style.cssText += ';height:auto!important;overflow:visible!important;';
+    });
+    window.addEventListener('afterprint', () => {
+      document.documentElement.style.height = '';
+      document.documentElement.style.overflow = '';
+      document.body.style.height = '';
+      document.body.style.overflow = '';
+      hide($quoteOverlay);
+    });
+
+    $printQuoteBtn.addEventListener('click', () => {
+      if (jobItems.length === 0) return;
+      const $pbBackdrop = document.getElementById('pb-modal-backdrop');
+      const $pbInput = document.getElementById('pb-name-input');
+      const $pbError = document.getElementById('pb-modal-error');
+      $pbInput.value = preparedBy;
+      $pbInput.classList.remove('error');
+      $pbError.textContent = '';
+      $pbBackdrop.classList.add('open');
+      setTimeout(() => $pbInput.focus(), 80);
+    });
+
+    // ── PREPARED BY MODAL HANDLERS ────────────────────────────────
+    document.getElementById('pb-modal-cancel').addEventListener('click', () => {
+      document.getElementById('pb-modal-backdrop').classList.remove('open');
+    });
+    document.getElementById('pb-name-input').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') document.getElementById('pb-modal-confirm').click();
+      if (e.key === 'Escape') document.getElementById('pb-modal-backdrop').classList.remove('open');
+    });
+    document.getElementById('pb-modal-confirm').addEventListener('click', () => {
+      const $pbInput = document.getElementById('pb-name-input');
+      const $pbError = document.getElementById('pb-modal-error');
+      const name = $pbInput.value.trim();
+      if (!name) {
+        $pbInput.classList.add('error');
+        $pbError.textContent = 'Please enter your name before generating the quote.';
+        $pbInput.focus();
+        return;
+      }
+      preparedBy = name;
+      document.getElementById('pb-modal-backdrop').classList.remove('open');
+      buildQuoteOverlay();
+      setTimeout(() => window.print(), 150);
+    });
+
+    function buildQuoteOverlay() {
+      const overlay = document.getElementById('quote-overlay');
+      const now = new Date();
+      const dateStr = now.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+      const logoSrc = getLogoSrc();
+
+      let totalRetail = 0, totalCost = 0, totalLabor = 0;
+      jobItems.forEach(i => {
+        if (i.type === 'labor') {
+          totalLabor += (Number(i.laborCost) || 0);
+        } else if (i.type === 'designfee') {
+          totalRetail += (Number(i.lineTotal) || 0);
+        } else {
+          totalRetail += (Number(i.lineTotal) || 0);
+          totalCost += (Number(i.matCost) || 0);
+          totalLabor += (Number(i.laborCost) || 0);
+        }
+      });
+      const subtotal = totalRetail + totalLabor;
+      const safeDiscountPct = Number(discountPct) || 0;
+      const safeDiscountAmt = Number(discountAmt) || 0;
+      const discountAmount = discountType === 'pct' ? subtotal * (safeDiscountPct / 100) : Math.min(safeDiscountAmt, subtotal);
+      const afterDiscount = subtotal - discountAmount;
+      const miscAmount = miscSurcharge ? afterDiscount * 0.50 : 0;
+      const taxAmount = taxExempt ? 0 : (afterDiscount + miscAmount) * TAX_RATE;
+      const grandTotal = afterDiscount + miscAmount + taxAmount;
+
+      let custBlock = '';
+      const prepByBlock = `<div class="quote-customer-block" style="margin-top:12px;">
+        <p class="quote-cust-label">Prepared By</p>
+        <p class="quote-cust-name">${preparedBy}</p>
+      </div>`;
+      if (customerInfo.name || customerInfo.phone || customerInfo.email) {
+        custBlock = `<div class="quote-customer-block">
+          <p class="quote-cust-label">Prepared For</p>
+          ${customerInfo.name ? `<p class="quote-cust-name">${customerInfo.name}</p>` : ''}
+          ${customerInfo.phone ? `<p class="quote-cust-detail">${customerInfo.phone}</p>` : ''}
+          ${customerInfo.email ? `<p class="quote-cust-detail">${customerInfo.email}</p>` : ''}
+        </div>${prepByBlock}`;
+      } else {
+        custBlock = prepByBlock;
+      }
+
+      let rows = '';
+      jobItems.forEach((item, idx) => {
+        const cls = idx % 2 === 0 ? 'quote-row-even' : '';
+        const itemLineTotal = Number(item.lineTotal) || 0;
+        const itemLaborHrs = Number(item.laborHrs) || 0;
+        const itemLaborCost = Number(item.laborCost) || 0;
+        rows += `<tr class="${cls}">
+          <td>${item.name || 'Unknown'}</td>
+          <td>${item.detail || ''}</td>
+          <td class="text-right">${fmt(itemLineTotal)}</td>
+        </tr>`;
+        if (item.type !== 'labor' && item.type !== 'scanfax' && item.type !== 'designfee' && itemLaborHrs > 0) {
+          rows += `<tr class="${cls}"><td colspan="2" style="padding-left:28px;font-size:11px;color:#6b7280;">└ Labor: ${itemLaborHrs}h × ${fmt(LABOR_RATE)}/hr</td><td class="text-right" style="font-size:11px;">${fmt(itemLaborCost)}</td></tr>`;
+        }
+      });
+
+      let totalsRows = `<div class="quote-totals-row"><span>Materials</span><span>${fmt(totalRetail)}</span></div>`;
+      if (totalLabor > 0) totalsRows += `<div class="quote-totals-row"><span>Labor</span><span>${fmt(totalLabor)}</span></div>`;
+      if (safeDiscountPct > 0 || safeDiscountAmt > 0) {
+        const discLabel = discountType === 'pct' ? `Discount (${safeDiscountPct}%)` : `Discount (−${fmt(safeDiscountAmt)})`;
+        totalsRows += `<div class="quote-totals-row quote-discount-row"><span>${discLabel}</span><span>−${fmt(discountAmount)}</span></div>`;
+      }
+      if (miscSurcharge) {
+        totalsRows += `<div class="quote-totals-row" style="color:#c00000;font-weight:600;"><span>MISC</span><span>${fmt(miscAmount)}</span></div>`;
+      }
+      totalsRows += taxExempt
+        ? `<div class="quote-totals-row" style="color:#2563eb;font-weight:600;"><span>Tax Exempt</span><span>$0.00</span></div>`
+        : `<div class="quote-totals-row"><span>Tax (7%)</span><span>${fmt(taxAmount)}</span></div>`;
+      totalsRows += `<hr class="quote-totals-divider" /><div class="quote-totals-row quote-total-final"><span>Total</span><span style="color:#f97316;">${fmt(grandTotal)}</span></div>`;
+
+      overlay.innerHTML = `
+        <div class="quote-page-border">
+          <div class="quote-logo-wrap">
+            <img src="${logoSrc}" alt="Pack-N-Fax" />
+          </div>
+          <div class="quote-header">
+            <div>
+              <div class="quote-company-name">Pack-N-Fax</div>
+              <div class="quote-tagline">Navarre, FL</div>
+            </div>
+            <div>
+              <div class="quote-title">QUOTE</div>
+              <div class="quote-date">${dateStr}</div>
+            </div>
+          </div>
+          <hr class="quote-hr" />
+          ${custBlock}
+          <table class="quote-table">
+            <thead><tr><th>Item</th><th>Details</th><th class="text-right">Amount</th></tr></thead>
+            <tbody>${rows}</tbody>
+          </table>
+          <div class="quote-totals-block">
+            <div class="quote-totals-inner">${totalsRows}</div>
+          </div>
+          <div class="quote-footer">
+            <p class="quote-footer-thanks">Thank you for choosing Pack-N-Fax!</p>
+            <p class="quote-footer-contact">(850) 939-2299 &nbsp;|&nbsp; packnfax@gmail.com &nbsp;|&nbsp; 8543 Navarre Pkwy, Navarre, FL 32566</p>
+          </div>
+        </div>
+      `;
+
+      // Show the overlay so @media print can pick it up
+      overlay.style.display = 'block';
+    }
+
+    // ── INITIAL RENDER ────────────────────────────────────────────
+    renderJobList();
+    renderSummary();
+    updateScanFaxPreview();
+    </script>
+  </body>
+</html>
